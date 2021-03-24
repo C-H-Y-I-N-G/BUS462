@@ -16,6 +16,7 @@ require(data.table)
 require(stargazer)
 require(ggplot2)
 require(PerformanceAnalytics)
+require(sqldf)
 
 #### LOAD DATA
 laptimes <- fread("C:/Users/chloe/Desktop/BUS 462/group project/f1db_csv/lap_times.csv")
