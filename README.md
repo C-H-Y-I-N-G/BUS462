@@ -4,7 +4,9 @@ The project is to analyse Formula 1 data through building OLS and LOGIT models w
 Scenario: Our team is hired as consultant for Renault to provide analysis on what constructor position they can achieve in 2022
 
 In this project,  we 
+
 -> find out the predictors of lap time performance
+
 -> predict the position based on the the above lap time data
 
 Decision making: 
