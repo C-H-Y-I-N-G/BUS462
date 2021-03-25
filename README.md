@@ -12,7 +12,7 @@ Drivers with constructors -> is getting a new driver going to decrease lap times
 How well are Renault drivers perform next year?
 
 ## Instructions
-Upload your completed files on under the main branch.
+Upload your completed files under the main branch.
 ## To upload your code
 ```C++
 //click the add button and choose file to upload
