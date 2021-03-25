@@ -40,5 +40,5 @@ status <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/statu
 
 head(results)
 
-dt <- merge(laptimes,drivers,by="driverId") #merge 2 data frame
+dt <- merge(lap_times,drivers,by="driverId") #merge 2 data frame
 dt <- subset(dt, select = -c(url)) #drop url column
