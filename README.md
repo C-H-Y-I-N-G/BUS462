@@ -1,4 +1,4 @@
-# BUS462
+# BUS462 Group Project
 ## Deliverable
 The project is to analyse Formula 1 data through building OLS and LOGIT models with R language. <br/>
 Scenario: Our team is hired as consultant for Renault to provide analysis on what constructor position they can achieve in 2022.
