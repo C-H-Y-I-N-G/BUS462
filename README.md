@@ -1,19 +1,14 @@
 # BUS462
 ## Deliverable
-The project is to analyse Formula 1 data through building OLS and LOGIT models with R language. 
-
+The project is to analyse Formula 1 data through building OLS and LOGIT models with R language. <br/>
 Scenario: Our team is hired as consultant for Renault to provide analysis on what constructor position they can achieve in 2022
 
-In this project,  we 
-
--> find out the predictors of lap time performance
-
+In this project,  we <br/>
+-> find out the predictors of lap time performance<br/>
 -> predict the position based on the the above lap time data
 
-Decision making: 
-
-Drivers with constructors -> is getting a new driver going to decrease lap times?
-
+Decision making: <br/>
+Drivers with constructors -> is getting a new driver going to decrease lap times? <br/>
 How well are Renault drivers perform next year?
 
 ## Instructions
