@@ -17,7 +17,7 @@ Upload your files on under the main branch
 ```C++
 //click the add button and choose file to upload
 ```
-If you have not finish your code and would like to upload your file on github, you can create your own branch and upload your files there first
+If you have not finished your code and would like to upload your file on github, you can create your own branch and upload your files there first
 ## To create a new branch
 ```C++
 //tab "code" -> "main" -> expand the main list -> type your branch name (eg. "chloe") -> click create branch under main
