@@ -13,7 +13,7 @@ How well are Renault drivers perform next year?
 
 ## Instructions
 Upload your files on under the main branch
-## To uploead your code
+## To upload your code
 ```C++
 //click the add button and choose file to upload
 ```
@@ -22,7 +22,7 @@ If you have not finish your code and would like to upload your file on github, y
 ```C++
 //tab "code" -> "main" -> expand the main list -> type your branch name (eg. "chloe") -> click create branch under main
 ```
-## To uploead your code under your branch
+## To upload your code under your branch
 ```C++
 //tab "code" -> "main" -> expand the main list -> switch to your desired branch -> click the add button and choose file to upload  
 ```
