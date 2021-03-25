@@ -18,11 +18,6 @@ require(ggplot2)
 require(PerformanceAnalytics)
 require(sqldf)
 
-
-#### LOAD DATA locally
-#laptimes <- fread("C:/Users/chloe/Desktop/BUS 462/group project/f1db_csv/lap_times.csv")
-#drivers <- fread("C:/Users/chloe/Desktop/BUS 462/group project/f1db_csv/drivers.csv")
-
 #Load data from Github
 circuits <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/circuits.csv?token=ARGCUJVFLHKMHJWC6XIH7BDALPFH2")
 constructor_results <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/constructor_results.csv?token=ARGCUJVTEA7CUOKHQGVEMSTALPFUQ")
