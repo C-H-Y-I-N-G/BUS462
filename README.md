@@ -15,15 +15,15 @@ How well are Renault drivers perform next year?
 Upload your completed files under the main branch.
 ## To upload your code
 ```C++
-//click the add button and choose file to upload
+// click the "add file" button and choose file to upload
 ```
 If you have not finished your code and would like to upload your file on github, you can create your own branch and upload your files there first.
 ## To create a new branch
 ```C++
-//tab "code" -> "main" -> expand the main list -> type your branch name (eg. "chloe") -> click create branch under main
+// tab "code" on lengend ->  "main" -> expand the main list -> type <your branch name> on the search bar -> click "create branch:<your branch name> under main"
 ```
 ## To upload your code under your branch
 ```C++
-//tab "code" -> "main" -> expand the main list -> switch to your desired branch -> click the add button and choose file to upload  
+// tab "code" on lengend -> "main" -> expand the main list -> switch to your desired branch -> click the add button and choose file to upload  
 ```
 If you have any questions just ask in Facebook messenger.
