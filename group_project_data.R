@@ -37,3 +37,36 @@ head(results)
 
 dt <- merge(lap_times,drivers,by="driverId") #merge 2 data frame
 dt <- subset(dt, select = -c(url)) #drop url column
+
+# organize races and results tables for merging
+races <- subset(races, select = -c(round,name,date,time,url))#drop columns
+results <- subset(results, select = -c(positionText,positionOrder))
+names(results)[names(results) == "position"] <- "race_position"
+names(results)[names(results) == "points"] <- "race_points"
+dt <- merge(races,results,by="raceId") #merge 2 data frame
+
+# merge status table
+dt <- merge(dt,status,by="statusId")
+
+# organize driver standings tables for merging
+driver_standings <- subset(driver_standings, select = -c(positionText))
+names(driver_standings)[names(driver_standings) == "position"] <- "season_position"
+names(driver_standings)[names(driver_standings) == "points"] <- "season_points"
+dt <- merge(dt,driver_standings,by=c("driverId","raceId"))
+
+# organize constructor standings and constructor results tables for merging
+constructor_standings <- subset(constructor_standings, select = -c(positionText))
+names(constructor_standings)[names(constructor_standings) == "position"] <- "constructor_position"
+names(constructor_standings)[names(constructor_standings) == "points"] <- "constructor_points"
+names(constructor_standings)[names(constructor_standings) == "wins"] <- "constructor_wins"
+names(constructor_results)[names(constructor_results) == "status"] <- "constructorResults_status"
+names(constructor_results)[names(constructor_results) == "points"] <- "constructorResults_points"
+dt <- merge(dt,constructor_standings, by=c("constructorId","raceId"))
+dt <- merge(dt,constructor_results, by=c("constructorId","raceId"))
+
+dt[duplicated(dt)]#check duplication
+dt[!duplicated(dt)]#remove duplication
+
+head(dt)
+
+View(dt) #we will need to convert /N race position to 0, also convert for other tables
