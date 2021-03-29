@@ -83,4 +83,23 @@ dt$race_position[is.na(dt$race_position)] = 0
 dt[duplicated(dt)]#check duplication
 dt[!duplicated(dt)]#remove duplication
 
+#look at data
 head(dt)
+View(dt)
+
+#check data type of columns
+str(dt)
+
+#create function that checks if any NAs are in a column
+check_na <- function(my_col){
+  any(is.na(my_col))
+}
+
+#apply function to each column in the set
+apply(dt, 2, check_na)
+
+#no NAs in dataset  after conversions
+
+
+
+
