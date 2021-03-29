@@ -17,10 +17,9 @@ require(ggplot2)
 require(PerformanceAnalytics)
 require(sqldf)
 
-#circuits <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/circuits.csv?token=ARGCUJVFLHKMHJWC6XIH7BDALPFH2")
-#lap_times <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/lap_times.csv?token=ARGCUJRBHFWPLGAR6JIU65TALPGZ4")
-#pit_stops <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/pit_stops.csv?token=ARGCUJSONNTEXU74NYPGU3DALPG7Q")
-#qualifying <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/qualifying.csv?token=ARGCUJX6ZEK3OU273Z62EETALPHFA")
+lap_times <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/lap_times.csv?token=ARGCUJRBHFWPLGAR6JIU65TALPGZ4")
+pit_stops <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/pit_stops.csv?token=ARGCUJSONNTEXU74NYPGU3DALPG7Q")
+qualifying <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/qualifying.csv?token=ARGCUJX6ZEK3OU273Z62EETALPHFA")
 constructor_results <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/constructor_results.csv?token=ARGCUJVTEA7CUOKHQGVEMSTALPFUQ")
 constructor_standings <-fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/constructor_standings.csv?token=ARGCUJVL4UAEH6G4MG6FX5DALPGEE")
 driver_standings <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/driver_standings.csv?token=ARGCUJUEKGGVYUIJUPBIEF3ALPGRS")
@@ -56,6 +55,30 @@ names(constructor_results)[names(constructor_results) == "status"] <- "construct
 names(constructor_results)[names(constructor_results) == "points"] <- "constructorResults_points"
 dt <- merge(dt,constructor_standings, by=c("constructorId","raceId"))
 dt <- merge(dt,constructor_results, by=c("constructorId","raceId"))
+
+# organize qualifying tables for merging
+qualifying <- subset(qualifying, select = -c(number))
+names(qualifying)[names(qualifying) == "position"] <- "qualifying_position"
+dt <- merge(dt,qualifying,by=c("driverId","raceId","constructorId"))
+
+# organize pit stop tables for merging
+pit_stops <- subset(pit_stops, select = -c(duration))#duration has same number as milliseconds
+names(pit_stops)[names(pit_stops) == "stop"] <- "pit_stop"
+names(pit_stops)[names(pit_stops) == "lap"] <- "pit_stops_lap"
+names(pit_stops)[names(pit_stops) == "time"] <- "pit_stops_time"
+names(pit_stops)[names(pit_stops) == "milliseconds"] <- "pit_stops_milliseconds"
+dt <- merge(dt,pit_stops, by=c("driverId","raceId"))
+
+# organize lap times tables for merging
+names(lap_times)[names(lap_times) == "position"] <- "lap_times_position"
+names(lap_times)[names(lap_times) == "lap"] <- "lap_times_lap"
+names(lap_times)[names(lap_times) == "time"] <- "lap_times_time"
+names(lap_times)[names(lap_times) == "milliseconds"] <- "lap_times_milliseconds"
+dt <- merge(dt,lap_times, by=c("driverId","raceId"))
+
+# replace all the \N race position to 0
+dt$race_position <- as.integer(dt$race_position)
+dt$race_position[is.na(dt$race_position)] = 0
 
 dt[duplicated(dt)]#check duplication
 dt[!duplicated(dt)]#remove duplication
