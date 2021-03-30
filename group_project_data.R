@@ -33,9 +33,11 @@ status <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/
 
 # organize races and results tables for merging
 races <- subset(races, select = -c(round,name,date,time,url))#drop columns
-results <- subset(results, select = -c(positionText,positionOrder))
-names(results)[names(results) == "position"] <- "race_position"
-names(results)[names(results) == "points"] <- "race_points"
+results <- subset(results, select = -c(positionText,positionOrder,time))
+names(results)[names(results) == "position"] <- "finishing_position"
+names(results)[names(results) == "points"] <- "finishing_points"
+names(results)[names(results) == "milliseconds"] <- "finishing_milliseconds"
+names(results)[names(results) == "laps"] <- "lap_finished"
 dt <- merge(races,results,by="raceId") #merge 2 data frame
 
 # merge status table
@@ -63,26 +65,27 @@ names(qualifying)[names(qualifying) == "position"] <- "qualifying_position"
 dt <- merge(dt,qualifying,by=c("driverId","raceId","constructorId"))
 
 # organize pit stop tables for merging
-pit_stops <- subset(pit_stops, select = -c(duration))#duration has same number as milliseconds
+pit_stops <- subset(pit_stops, select = -c(duration,time))#duration has same number as milliseconds
 names(pit_stops)[names(pit_stops) == "stop"] <- "pit_stop"
 names(pit_stops)[names(pit_stops) == "lap"] <- "pit_stops_lap"
-names(pit_stops)[names(pit_stops) == "time"] <- "pit_stops_time"
 names(pit_stops)[names(pit_stops) == "milliseconds"] <- "pit_stops_milliseconds"
 dt <- merge(dt,pit_stops, by=c("driverId","raceId"))
 
 # organize lap times tables for merging
+lap_times <- subset(lap_times, select = -c(time))
 names(lap_times)[names(lap_times) == "position"] <- "lap_times_position"
 names(lap_times)[names(lap_times) == "lap"] <- "lap_times_lap"
-names(lap_times)[names(lap_times) == "time"] <- "lap_times_time"
 names(lap_times)[names(lap_times) == "milliseconds"] <- "lap_times_milliseconds"
 dt <- merge(dt,lap_times, by=c("driverId","raceId"))
 
 # replace all the \N race position to 0
 dt$race_position <- as.integer(dt$race_position)
-dt$race_position[is.na(dt$race_position)] = 0
+dt$race_position[is.na(dt$race_position)] = 50
 
 dt[duplicated(dt)]#check duplication
 dt[!duplicated(dt)]#remove duplication
+
+dt <- subset(dt, year > 2014)#shrink the table to year 2015-2020
 
 #look at data
 head(dt)
@@ -100,11 +103,3 @@ check_na <- function(my_col){
 apply(dt, 2, check_na)
 
 #no NAs in dataset  after conversions
-
-#NEXT STEPS
-#drop times, keep milliseconds
-#cut to 2015 onwards
-
-
-
-
