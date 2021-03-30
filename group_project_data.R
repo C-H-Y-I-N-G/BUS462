@@ -91,9 +91,6 @@ dt <- subset(dt, year > 2014)#shrink the table to year 2015-2020
 head(dt)
 View(dt)
 
-#check data type of columns
-str(dt)
-
 #create function that checks if any NAs are in a column
 check_na <- function(my_col){
   any(is.na(my_col))
@@ -103,3 +100,8 @@ check_na <- function(my_col){
 apply(dt, 2, check_na)
 
 #no NAs in dataset  after conversions
+
+#check data type of columns
+str(dt)
+
+#convert chrs to ints
