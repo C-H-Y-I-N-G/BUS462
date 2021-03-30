@@ -101,6 +101,10 @@ apply(dt, 2, check_na)
 
 #no NAs in dataset  after conversions
 
+#NEXT STEPS
+#drop times, keep milliseconds
+#cut to 2015 onwards
+
 
 
 
