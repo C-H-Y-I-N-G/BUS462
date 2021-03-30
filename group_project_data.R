@@ -79,8 +79,8 @@ names(lap_times)[names(lap_times) == "milliseconds"] <- "lap_times_milliseconds"
 dt <- merge(dt,lap_times, by=c("driverId","raceId"))
 
 # replace all the \N race position to 0
-dt$race_position <- as.integer(dt$race_position)
-dt$race_position[is.na(dt$race_position)] = 50
+dt$finishing_position <- as.integer(dt$finishing_position)
+dt$finishing_position[is.na(dt$finishing_position)] = 50
 
 dt[duplicated(dt)]#check duplication
 dt[!duplicated(dt)]#remove duplication
