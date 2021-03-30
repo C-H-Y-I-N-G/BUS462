@@ -80,7 +80,7 @@ dt <- merge(dt,lap_times, by=c("driverId","raceId"))
 
 # replace all the \N race position to 0
 dt$finishing_position <- as.integer(dt$finishing_position)
-dt$finishing_position[is.na(dt$finishing_position)] = 50
+dt$finishing_position[is.na(dt$finishing_position)] = 50 #can change to 21 
 
 dt[duplicated(dt)]#check duplication
 dt[!duplicated(dt)]#remove duplication
@@ -104,4 +104,21 @@ apply(dt, 2, check_na)
 #check data type of columns
 str(dt)
 
-#convert chrs to ints
+#convert milliseconds from chr to int 
+dt$finishing_milliseconds <- as.integer(dt$finishing_milliseconds)
+dt$finishing_milliseconds[is.na(dt$finishing_milliseconds)] = 20000000 #setting dummy value to punish dnf
+
+#convert rank to int
+dt$rank <- as.integer(dt$rank)
+
+#convert fastest lap speed
+dt$fastestLapSpeed <- as.numeric(dt$fastestLapSpeed)
+dt$fastestLapSpeed[is.na(dt$fastestLapSpeed)] = 0 #for NAs set to 0
+
+
+
+
+
+
+
+
