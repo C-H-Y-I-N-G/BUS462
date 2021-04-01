@@ -17,6 +17,8 @@ require(stargazer)
 require(ggplot2)
 require(PerformanceAnalytics)
 require(sqldf)
+require(dyplr)
+require(pastecs)
 
 #Load data from Github
 circuits <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/circuits.csv?token=ARGCUJVFLHKMHJWC6XIH7BDALPFH2")
@@ -68,5 +70,55 @@ dt[duplicated(dt)]#check duplication
 dt[!duplicated(dt)]#remove duplication
 
 head(dt)
+<<<<<<< Updated upstream
+=======
+View(dt)
+
+#create function that checks if any NAs are in a column
+check_na <- function(my_col){
+  any(is.na(my_col))
+}
+
+#apply function to each column in the set
+apply(dt, 2, check_na)
+
+#no NAs in dataset  after conversions
+
+#check data type of columns
+str(dt)
+
+#convert milliseconds from chr to int 
+dt$finishing_milliseconds <- as.integer(dt$finishing_milliseconds)
+dt$finishing_milliseconds[is.na(dt$finishing_milliseconds)] = 20000000 #setting dummy value to punish dnf
+
+#convert rank to int
+dt$rank <- as.integer(dt$rank)
+
+#convert fastest lap speed
+dt$fastestLapSpeed <- as.numeric(dt$fastestLapSpeed)
+dt$fastestLapSpeed[is.na(dt$fastestLapSpeed)] = 0 #for NAs set to 0
+
+
+#BEGINNING OF PRELIMINARY ANALYSIS 
+
+#summary stats of dataset
+summary(dt)
+stat.desc(dt)
+stargazer(dt,type="text",summary.stat = c("min", "p25", "median","mean", "p75", "max","sd")) #stargazer best for visual
+
+
+#split data into points (>=10) and no points(<10) positions
+dt_points <- dt[dt$finishing_position<=10]
+dt_nopoints <- dt[dt$finishing_position>10]
+
+#summary stats of points
+stargazer(dt_points,type="text",summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
+
+#summary stats of no points
+stargazer(dt_nopoints,type="text",summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
+
+#notable differences (CK wants us to include sd as well as mean when discussing summary)
+
+>>>>>>> Stashed changes
 
 View(dt) #we will need to convert /N race position to 0, also convert for other tables
