@@ -105,7 +105,7 @@ summary(dt)
 stat.desc(dt)
 stargazer(dt,type="text",summary.stat = c("min", "p25", "median","mean", "p75", "max","sd")) #stargazer best for visual
 
-
+#COMPARING POINTS VS NO POINTS POSITIONS
 #split data into points (>=10) and no points(<10) positions
 dt_points <- dt[dt$finishing_position<=10]
 dt_nopoints <- dt[dt$finishing_position>10]
@@ -122,3 +122,21 @@ stargazer(dt_nopoints,type="text",summary.stat = c("min", "p25", "median","mean"
 #no points finishers surprisingly had lower mean and median pit stop milliseconds
 #lap time median and means surprisingly close between the two groups 
 #
+
+#COMPARING PODIUM VS THE REST
+dt_podium <- dt[dt$finishing_position<=3]
+dt_nopodium <- dt[dt$finishing_position>3]
+
+#summary stats of points
+stargazer(dt_podium,type="text",summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
+
+#summary stats of no points
+stargazer(dt_nopodium,type="text",summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
+
+#notable differences
+#even bigger in qualifying position, mean around 3 for podium finishers, qualifying strong determinant
+#pit times again lower in the worse performing group, worth looking into, maybe something to do with
+#more thorough team
+#lap times again slightly lower for higher performing group 
+
+
