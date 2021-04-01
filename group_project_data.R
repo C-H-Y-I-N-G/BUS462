@@ -16,6 +16,8 @@ require(stargazer)
 require(ggplot2)
 require(PerformanceAnalytics)
 require(sqldf)
+require(dyplr)
+require(pastecs)
 
 #load data
 lap_times <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/lap_times.csv?token=ARGCUJRBHFWPLGAR6JIU65TALPGZ4")
