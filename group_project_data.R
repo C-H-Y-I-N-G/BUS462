@@ -70,8 +70,7 @@ dt[duplicated(dt)]#check duplication
 dt[!duplicated(dt)]#remove duplication
 
 head(dt)
-<<<<<<< Updated upstream
-=======
+
 View(dt)
 
 #create function that checks if any NAs are in a column
@@ -118,7 +117,8 @@ stargazer(dt_points,type="text",summary.stat = c("min", "p25", "median","mean", 
 stargazer(dt_nopoints,type="text",summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
 
 #notable differences (CK wants us to include sd as well as mean when discussing summary)
-
->>>>>>> Stashed changes
-
-View(dt) #we will need to convert /N race position to 0, also convert for other tables
+#points finishers had higher median and mean fastest lap speed
+#points finishers had MUCH lower(better) qualifying position, determines grid and is likely important
+#no points finishers surprisingly had lower mean and median pit stop milliseconds
+#lap time median and means surprisingly close between the two groups 
+#
