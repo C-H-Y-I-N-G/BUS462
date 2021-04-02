@@ -134,10 +134,10 @@ dt_points <- dt[dt$finishing_position<=10]
 dt_nopoints <- dt[dt$finishing_position>10]
 
 #summary stats of points
-stargazer(dt_points,type="text",summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
+stargazer(dt_points,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
 
 #summary stats of no points
-stargazer(dt_nopoints,type="text",summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
+stargazer(dt_nopoints,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
 
 #notable differences (CK wants us to include sd as well as mean when discussing summary)
 #points finishers had higher median and mean fastest lap speed
@@ -151,10 +151,10 @@ dt_podium <- dt[dt$finishing_position<=3]
 dt_nopodium <- dt[dt$finishing_position>3]
 
 #summary stats of points
-stargazer(dt_podium,type="text",summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
+stargazer(dt_podium,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
 
 #summary stats of no points
-stargazer(dt_nopodium,type="text",summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
+stargazer(dt_nopodium,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
 
 #notable differences
 #even bigger in qualifying position, mean around 3 for podium finishers, qualifying strong determinant
