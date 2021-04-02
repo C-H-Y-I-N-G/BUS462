@@ -78,14 +78,14 @@ dt <- merge(dt,pit_stops, by=c("driverId","raceId"))
 
 # organize lap times tables for merging
 lap_times <- subset(lap_times, select = -c(time))
-names(lap_times)[names(lap_times) == "position"] <- "lap_times_position"
+names(lap_times)[names(lap_times) == "position"] <- "lap_times_position" #could cut this
 names(lap_times)[names(lap_times) == "lap"] <- "lap_times_lap"
 names(lap_times)[names(lap_times) == "milliseconds"] <- "lap_times_milliseconds"
 dt <- merge(dt,lap_times, by=c("driverId","raceId"))
 
 # replace all the \N race position to 0
 dt$finishing_position <- as.integer(dt$finishing_position)
-dt$finishing_position[is.na(dt$finishing_position)] = 21 #can change to 50
+dt$finishing_position[is.na(dt$finishing_position)] = 23 #can change to 50
 
 dt[duplicated(dt)]#check duplication
 dt[!duplicated(dt)]#remove duplication
