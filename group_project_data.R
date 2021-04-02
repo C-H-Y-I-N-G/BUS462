@@ -62,6 +62,8 @@ dt <- merge(dt,constructor_standings, by=c("constructorId","raceId"))
 dt <- merge(dt,constructor_results, by=c("constructorId","raceId"))
 
 # organize qualifying tables for merging
+#include position and qs for models 
+#NOTE: changed q1-3 times to milliseconds in Excel
 qualifying <- subset(qualifying, select = -c(number))
 names(qualifying)[names(qualifying) == "position"] <- "qualifying_position"
 dt <- merge(dt,qualifying,by=c("driverId","raceId","constructorId"))
@@ -157,4 +159,8 @@ stargazer(dt_nopodium,type="text",summary.stat = c("min", "p25", "median","mean"
 #pit times again lower in the worse performing group, worth looking into, maybe something to do with
 #more thorough team
 #lap times again slightly lower for higher performing group 
+
+
+#MODELS
+#control for circuit ID and year
 
