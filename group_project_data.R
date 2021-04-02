@@ -66,6 +66,7 @@ dt <- merge(dt,constructor_results, by=c("constructorId","raceId"))
 #NOTE: changed q1-3 times to milliseconds in Excel
 qualifying <- subset(qualifying, select = -c(number))
 names(qualifying)[names(qualifying) == "position"] <- "qualifying_position"
+qualifying$qmean <- ((qualifying$q1_milliseconds+qualifying$q2_milliseconds+qualifying$q3_milliseconds)/3)
 dt <- merge(dt,qualifying,by=c("driverId","raceId","constructorId"))
 
 # organize pit stop tables for merging
