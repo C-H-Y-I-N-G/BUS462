@@ -56,7 +56,7 @@ constructor_standings <- subset(constructor_standings, select = -c(positionText)
 names(constructor_standings)[names(constructor_standings) == "position"] <- "constructor_position"
 names(constructor_standings)[names(constructor_standings) == "points"] <- "constructor_points"
 names(constructor_standings)[names(constructor_standings) == "wins"] <- "constructor_wins"
-names(constructor_results)[names(constructor_results) == "status"] <- "constructorResults_status"
+names(constructor_results)[names(constructor_results) == "status"] <- "constructorResults_status" #can cut this
 names(constructor_results)[names(constructor_results) == "points"] <- "constructorResults_points"
 dt <- merge(dt,constructor_standings, by=c("constructorId","raceId"))
 dt <- merge(dt,constructor_results, by=c("constructorId","raceId"))
