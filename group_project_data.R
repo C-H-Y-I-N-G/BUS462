@@ -128,6 +128,9 @@ summary(dt)
 stat.desc(dt)
 stargazer(dt,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd")) #stargazer best for visual
 
+#start of correlation chart
+dt_numeric <-
+
 #COMPARING POINTS VS NO POINTS POSITIONS
 #split data into points (>=10) and no points(<10) positions
 dt_points <- dt[dt$finishing_position<=10]
@@ -145,6 +148,10 @@ stargazer(dt_nopoints,type="text",omit=c("driverId","raceId","constructorId","re
 #no points finishers surprisingly had lower mean and median pit stop milliseconds
 #lap time median and means surprisingly close between the two groups 
 #
+
+#graphing variable differences
+
+
 
 #COMPARING PODIUM VS THE REST
 dt_podium <- dt[dt$finishing_position<=3]
