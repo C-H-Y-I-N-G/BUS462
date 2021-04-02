@@ -35,7 +35,7 @@ status <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/
 
 # organize races and results tables for merging
 races <- subset(races, select = -c(round,name,date,time,url))#drop columns
-results <- subset(results, select = -c(positionText,positionOrder,time))
+results <- subset(results, select = -c(positionText,positionOrder,time,number))
 names(results)[names(results) == "position"] <- "finishing_position"
 names(results)[names(results) == "points"] <- "finishing_points"
 names(results)[names(results) == "milliseconds"] <- "finishing_milliseconds"
