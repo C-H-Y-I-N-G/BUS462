@@ -121,11 +121,12 @@ dt$fastestLapSpeed <- as.numeric(dt$fastestLapSpeed)
 dt$fastestLapSpeed[is.na(dt$fastestLapSpeed)] = 0 #for NAs set to 0
 
 #BEGINNING OF PRELIMINARY ANALYSIS 
+#NOTE: add comparative histograms and boxplots between groups (both distributions on one)
 
 #summary stats of dataset
 summary(dt)
 stat.desc(dt)
-stargazer(dt,type="text",summary.stat = c("min", "p25", "median","mean", "p75", "max","sd")) #stargazer best for visual
+stargazer(dt,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd")) #stargazer best for visual
 
 #COMPARING POINTS VS NO POINTS POSITIONS
 #split data into points (>=10) and no points(<10) positions
