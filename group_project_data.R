@@ -20,15 +20,15 @@ require(dyplr)
 require(pastecs)
 
 #load data
-lap_times <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/lap_times.csv?token=ARGCUJRBHFWPLGAR6JIU65TALPGZ4")
-pit_stops <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/pit_stops.csv?token=ARGCUJSONNTEXU74NYPGU3DALPG7Q")
-qualifying <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/qualifying.csv?token=ARGCUJX6ZEK3OU273Z62EETALPHFA")
-constructor_results <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/constructor_results.csv?token=ARGCUJVTEA7CUOKHQGVEMSTALPFUQ")
-constructor_standings <-fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/constructor_standings.csv?token=ARGCUJVL4UAEH6G4MG6FX5DALPGEE")
-driver_standings <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/driver_standings.csv?token=ARGCUJUEKGGVYUIJUPBIEF3ALPGRS")
-races <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/races.csv?token=ARGCUJTJIFZSYPYKCUAZJ2TALPHJG")
-results <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/results.csv?token=ARGCUJVOFVMB7TWWVUIK3DDALPHNC")
-status <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/status.csv?token=ARGCUJSK3IMT54XZMKATKG3ALPH4M")
+lap_times <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/lap_times.csv")
+pit_stops <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/pit_stops.csv")
+qualifying <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/qualifying.csv")
+constructor_results <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/constructor_results.csv")
+constructor_standings <-fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/constructor_standings.csv")
+driver_standings <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/driver_standings.csv")
+races <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/races.csv")
+results <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/results.csv")
+status <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/status.csv")
 # races table replace seasons table
 # driver standings table replace drivers table
 # constructor results and constructor standings replaces constructors table
@@ -52,11 +52,12 @@ names(driver_standings)[names(driver_standings) == "points"] <- "season_points"
 dt <- merge(dt,driver_standings,by=c("driverId","raceId"))
 
 # organize constructor standings and constructor results tables for merging
-constructor_standings <- subset(constructor_standings, select = -c(positionText,status))
+constructor_standings <- subset(constructor_standings, select = -c(positionText))
 names(constructor_standings)[names(constructor_standings) == "position"] <- "constructor_position"
 names(constructor_standings)[names(constructor_standings) == "points"] <- "constructor_points"
 names(constructor_standings)[names(constructor_standings) == "wins"] <- "constructor_wins"
 names(constructor_results)[names(constructor_results) == "points"] <- "constructorResults_points"
+names(constructor_results)[names(constructor_results) == "status"] <- "constructorResults_status"
 dt <- merge(dt,constructor_standings, by=c("constructorId","raceId"))
 dt <- merge(dt,constructor_results, by=c("constructorId","raceId"))
 
@@ -103,8 +104,6 @@ check_na <- function(my_col){
 #apply function to each column in the set
 apply(dt, 2, check_na)
 
-#no NAs in dataset  after conversions
-
 #check data type of columns
 str(dt)
 
@@ -112,8 +111,14 @@ str(dt)
 dt$finishing_milliseconds <- as.integer(dt$finishing_milliseconds)
 dt$finishing_milliseconds[is.na(dt$finishing_milliseconds)] = 20000000 #setting dummy value to punish dnf
 
-#convert rank to int
+#convert columns to int
 dt$rank <- as.integer(dt$rank)
+dt$q1_milliseconds <- as.integer(dt$q1_milliseconds)
+#dt$q1_milliseconds[is.na(dt$q1_milliseconds)] = 20000000
+dt$q2_milliseconds <- as.integer(dt$q2_milliseconds)
+#dt$q2_milliseconds[is.na(dt$q2_milliseconds)] = 20000000
+dt$q3_milliseconds <- as.integer(dt$q3_milliseconds)
+#dt$q3_milliseconds[is.na(dt$q3_milliseconds)] = 20000000
 
 #convert fastest lap speed
 dt$fastestLapSpeed <- as.numeric(dt$fastestLapSpeed)
@@ -128,11 +133,18 @@ stat.desc(dt)
 stargazer(dt,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd")) #stargazer best for visual
 
 #start of correlation chart
-dt_numeric <-
+dt_numeric <- na.omit(dt)
+dt_numeric <- subset(dt_numeric, select = -c(fastestLap,fastestLapTime,status,constructorResults_status))
+dt_laptimes <- dt_numeric[,c("finishing_position", "q1_milliseconds", "q2_milliseconds","q3_milliseconds","lap_times_milliseconds")]
+chart.Correlation(dt_laptimes,histogram=TRUE, pch=19)
+
+#library(writexl) #export to dt to excel
+#write_xlsx(dt, "c:/Users/chloe/Desktop/dt.xlsx")
+#write_xlsx(dt_numeric, "c:/Users/chloe/Desktop/dt_numeric.xlsx")
   
-  #COMPARING POINTS VS NO POINTS POSITIONS
-  #split data into points (>=10) and no points(<10) positions
-  dt_points <- dt[dt$finishing_position<=10]
+#COMPARING POINTS VS NO POINTS POSITIONS
+#split data into points (>=10) and no points(<10) positions
+dt_points <- dt[dt$finishing_position<=10]
 dt_nopoints <- dt[dt$finishing_position>10]
 
 #summary stats of points
