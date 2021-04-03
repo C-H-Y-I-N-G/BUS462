@@ -52,11 +52,10 @@ names(driver_standings)[names(driver_standings) == "points"] <- "season_points"
 dt <- merge(dt,driver_standings,by=c("driverId","raceId"))
 
 # organize constructor standings and constructor results tables for merging
-constructor_standings <- subset(constructor_standings, select = -c(positionText))
+constructor_standings <- subset(constructor_standings, select = -c(positionText,status))
 names(constructor_standings)[names(constructor_standings) == "position"] <- "constructor_position"
 names(constructor_standings)[names(constructor_standings) == "points"] <- "constructor_points"
 names(constructor_standings)[names(constructor_standings) == "wins"] <- "constructor_wins"
-names(constructor_results)[names(constructor_results) == "status"] <- "constructorResults_status" #can cut this
 names(constructor_results)[names(constructor_results) == "points"] <- "constructorResults_points"
 dt <- merge(dt,constructor_standings, by=c("constructorId","raceId"))
 dt <- merge(dt,constructor_results, by=c("constructorId","raceId"))
@@ -130,10 +129,10 @@ stargazer(dt,type="text",omit=c("driverId","raceId","constructorId","resultId","
 
 #start of correlation chart
 dt_numeric <-
-
-#COMPARING POINTS VS NO POINTS POSITIONS
-#split data into points (>=10) and no points(<10) positions
-dt_points <- dt[dt$finishing_position<=10]
+  
+  #COMPARING POINTS VS NO POINTS POSITIONS
+  #split data into points (>=10) and no points(<10) positions
+  dt_points <- dt[dt$finishing_position<=10]
 dt_nopoints <- dt[dt$finishing_position>10]
 
 #summary stats of points
@@ -172,4 +171,3 @@ stargazer(dt_nopodium,type="text",omit=c("driverId","raceId","constructorId","re
 
 #MODELS
 #control for circuit ID and year
-
