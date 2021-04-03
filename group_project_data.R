@@ -94,7 +94,7 @@ dt <- subset(dt, year > 2014)#shrink the table to year 2015-2020
 
 #look at data
 head(dt)
-View(dt)
+#View(dt)
 
 #create function that checks if any NAs are in a column
 check_na <- function(my_col){
@@ -136,6 +136,7 @@ stargazer(dt,type="text",omit=c("driverId","raceId","constructorId","resultId","
 dt_numeric <- na.omit(dt)
 dt_numeric <- subset(dt_numeric, select = -c(fastestLap,fastestLapTime,status,constructorResults_status))
 dt_laptimes <- dt_numeric[,c("finishing_position", "q1_milliseconds", "q2_milliseconds","q3_milliseconds","lap_times_milliseconds")]
+dt_laptimes$qmean <- (dt_laptimes$q1_milliseconds+dt_laptimes$q1_milliseconds+dt_laptimes$q1_milliseconds)/3
 chart.Correlation(dt_laptimes,histogram=TRUE, pch=19)
 
 #library(writexl) #export to dt to excel
