@@ -112,6 +112,7 @@ dt$q3_milliseconds <- as.integer(dt$q3_milliseconds)
 #convert fastest lap speed
 dt$fastestLapSpeed <- as.numeric(dt$fastestLapSpeed)
 
+#omit nas for prelim analysis, will have dummies for model
 dt <- na.omit(dt)
 
 dt$qmean <- (dt$q1_milliseconds+dt$q2_milliseconds+dt$q3_milliseconds)/3
@@ -128,8 +129,6 @@ apply(dt, 2, check_na)
 #NOTE: add comparative histograms and boxplots between groups (both distributions on one)
 
 #summary stats of dataset
-summary(dt)
-stat.desc(dt)
 stargazer(dt,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd")) #stargazer best for visual
 
 #start of correlation chart
