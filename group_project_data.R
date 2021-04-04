@@ -56,8 +56,8 @@ constructor_standings <- subset(constructor_standings, select = -c(positionText)
 names(constructor_standings)[names(constructor_standings) == "position"] <- "constructor_position"
 names(constructor_standings)[names(constructor_standings) == "points"] <- "constructor_points"
 names(constructor_standings)[names(constructor_standings) == "wins"] <- "constructor_wins"
+constructor_results <- subset(constructor_results, select = -c(status))
 names(constructor_results)[names(constructor_results) == "points"] <- "constructorResults_points"
-names(constructor_results)[names(constructor_results) == "status"] <- "constructorResults_status"
 dt <- merge(dt,constructor_standings, by=c("constructorId","raceId"))
 dt <- merge(dt,constructor_results, by=c("constructorId","raceId"))
 
@@ -134,10 +134,10 @@ stargazer(dt,type="text",omit=c("driverId","raceId","constructorId","resultId","
 
 #start of correlation chart
 dt_numeric <- na.omit(dt)
-dt_numeric <- subset(dt_numeric, select = -c(fastestLap,fastestLapTime,status,constructorResults_status))
-dt_laptimes <- dt_numeric[,c("finishing_position", "q1_milliseconds", "q2_milliseconds","q3_milliseconds","lap_times_milliseconds")]
-dt_laptimes$qmean <- (dt_laptimes$q1_milliseconds+dt_laptimes$q1_milliseconds+dt_laptimes$q1_milliseconds)/3
-chart.Correlation(dt_laptimes,histogram=TRUE, pch=19)
+dt_numeric <- subset(dt_numeric, select = -c(fastestLap,fastestLapTime,status))
+dt_numeric$qmean <- (dt_numeric$q1_milliseconds+dt_numeric$q2_milliseconds+dt_numeric$q3_milliseconds)/3
+dt_model <- dt_numeric[,c("finishing_position","qmean","lap_times_milliseconds","qualifying_position","pit_stops_milliseconds","fastestLapSpeed","circuitId","year")]
+chart.Correlation(dt_model,histogram=TRUE, pch=19)
 
 #library(writexl) #export to dt to excel
 #write_xlsx(dt, "c:/Users/chloe/Desktop/dt.xlsx")
