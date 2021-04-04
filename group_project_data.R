@@ -96,6 +96,26 @@ dt <- subset(dt, year > 2014)#shrink the table to year 2015-2020
 head(dt)
 #View(dt)
 
+#check data type of columns
+str(dt)
+
+#convert milliseconds from chr to int 
+dt$finishing_milliseconds <- as.integer(dt$finishing_milliseconds)
+#dt$finishing_milliseconds[is.na(dt$finishing_milliseconds)] = 20000000 #setting dummy value to punish dnf - for model
+
+#convert columns to int
+dt$rank <- as.integer(dt$rank)
+dt$q1_milliseconds <- as.integer(dt$q1_milliseconds)
+dt$q2_milliseconds <- as.integer(dt$q2_milliseconds)
+dt$q3_milliseconds <- as.integer(dt$q3_milliseconds)
+
+#convert fastest lap speed
+dt$fastestLapSpeed <- as.numeric(dt$fastestLapSpeed)
+
+dt <- na.omit(dt)
+
+dt$qmean <- (dt$q1_milliseconds+dt$q2_milliseconds+dt$q3_milliseconds)/3
+
 #create function that checks if any NAs are in a column
 check_na <- function(my_col){
   any(is.na(my_col))
@@ -103,28 +123,6 @@ check_na <- function(my_col){
 
 #apply function to each column in the set
 apply(dt, 2, check_na)
-
-#check data type of columns
-str(dt)
-
-#convert milliseconds from chr to int 
-dt$finishing_milliseconds <- as.integer(dt$finishing_milliseconds)
-dt$finishing_milliseconds[is.na(dt$finishing_milliseconds)] = 20000000 #setting dummy value to punish dnf
-
-#convert columns to int
-dt$rank <- as.integer(dt$rank)
-dt$q1_milliseconds <- as.integer(dt$q1_milliseconds)
-#dt$q1_milliseconds[is.na(dt$q1_milliseconds)] = 20000000
-dt$q2_milliseconds <- as.integer(dt$q2_milliseconds)
-#dt$q2_milliseconds[is.na(dt$q2_milliseconds)] = 20000000
-dt$q3_milliseconds <- as.integer(dt$q3_milliseconds)
-#dt$q3_milliseconds[is.na(dt$q3_milliseconds)] = 20000000
-
-#convert fastest lap speed
-dt$fastestLapSpeed <- as.numeric(dt$fastestLapSpeed)
-dt$fastestLapSpeed[is.na(dt$fastestLapSpeed)] = 0 #for NAs set to 0
-
-dt$qmean <- (dt$q1_milliseconds+dt$q2_milliseconds+dt$q3_milliseconds)/3
 
 #BEGINNING OF PRELIMINARY ANALYSIS 
 #NOTE: add comparative histograms and boxplots between groups (both distributions on one)
@@ -135,7 +133,6 @@ stat.desc(dt)
 stargazer(dt,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd")) #stargazer best for visual
 
 #start of correlation chart
-dt_numeric <- na.omit(dt)
 dt_numeric <- subset(dt_numeric, select = -c(fastestLap,fastestLapTime,status))
 #dt_numeric$qmean <- (dt_numeric$q1_milliseconds+dt_numeric$q2_milliseconds+dt_numeric$q3_milliseconds)/3
 dt_model <- dt_numeric[,c("finishing_position","qmean","lap_times_milliseconds","qualifying_position","pit_stops_milliseconds","fastestLapSpeed","circuitId","year")]
