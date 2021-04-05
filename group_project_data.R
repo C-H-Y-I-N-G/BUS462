@@ -132,7 +132,7 @@ apply(dt, 2, check_na)
 stargazer(dt,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd")) #stargazer best for visual
 
 #start of correlation chart
-dt_numeric <- subset(dt_numeric, select = -c(fastestLap,fastestLapTime,status))
+dt_numeric <- subset(dt, select = -c(fastestLap,fastestLapTime,status))
 #dt_numeric$qmean <- (dt_numeric$q1_milliseconds+dt_numeric$q2_milliseconds+dt_numeric$q3_milliseconds)/3
 dt_model <- dt_numeric[,c("finishing_position","qmean","lap_times_milliseconds","qualifying_position","pit_stops_milliseconds","fastestLapSpeed","circuitId","year")]
 chart.Correlation(dt_model,histogram=TRUE, pch=19)
