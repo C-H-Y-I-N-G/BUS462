@@ -167,10 +167,10 @@ stargazer(dt_nopoints,type="text",omit=c("driverId","raceId","constructorId","re
 dt_podium <- dt[dt$finishing_position<=3]
 dt_nopodium <- dt[dt$finishing_position>3]
 
-#summary stats of points
+#summary stats of odium
 stargazer(dt_podium,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
 
-#summary stats of no points
+#summary stats of no podium
 stargazer(dt_nopodium,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
 
 #notable differences
