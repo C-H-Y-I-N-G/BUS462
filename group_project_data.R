@@ -56,8 +56,8 @@ constructor_standings <- subset(constructor_standings, select = -c(positionText)
 names(constructor_standings)[names(constructor_standings) == "position"] <- "constructor_position"
 names(constructor_standings)[names(constructor_standings) == "points"] <- "constructor_points"
 names(constructor_standings)[names(constructor_standings) == "wins"] <- "constructor_wins"
+constructor_results <- subset(constructor_results, select = -c(status))
 names(constructor_results)[names(constructor_results) == "points"] <- "constructorResults_points"
-names(constructor_results)[names(constructor_results) == "status"] <- "constructorResults_status"
 dt <- merge(dt,constructor_standings, by=c("constructorId","raceId"))
 dt <- merge(dt,constructor_results, by=c("constructorId","raceId"))
 
@@ -96,6 +96,27 @@ dt <- subset(dt, year > 2014)#shrink the table to year 2015-2020
 head(dt)
 #View(dt)
 
+#check data type of columns
+str(dt)
+
+#convert milliseconds from chr to int 
+dt$finishing_milliseconds <- as.integer(dt$finishing_milliseconds)
+#dt$finishing_milliseconds[is.na(dt$finishing_milliseconds)] = 20000000 #setting dummy value to punish dnf - for model
+
+#convert columns to int
+dt$rank <- as.integer(dt$rank)
+dt$q1_milliseconds <- as.integer(dt$q1_milliseconds)
+dt$q2_milliseconds <- as.integer(dt$q2_milliseconds)
+dt$q3_milliseconds <- as.integer(dt$q3_milliseconds)
+
+#convert fastest lap speed
+dt$fastestLapSpeed <- as.numeric(dt$fastestLapSpeed)
+
+#omit nas for prelim analysis, will have dummies for model
+dt <- na.omit(dt)
+
+dt$qmean <- (dt$q1_milliseconds+dt$q2_milliseconds+dt$q3_milliseconds)/3
+
 #create function that checks if any NAs are in a column
 check_na <- function(my_col){
   any(is.na(my_col))
@@ -104,45 +125,22 @@ check_na <- function(my_col){
 #apply function to each column in the set
 apply(dt, 2, check_na)
 
-#check data type of columns
-str(dt)
-
-#convert milliseconds from chr to int 
-dt$finishing_milliseconds <- as.integer(dt$finishing_milliseconds)
-dt$finishing_milliseconds[is.na(dt$finishing_milliseconds)] = 20000000 #setting dummy value to punish dnf
-
-#convert columns to int
-dt$rank <- as.integer(dt$rank)
-dt$q1_milliseconds <- as.integer(dt$q1_milliseconds)
-#dt$q1_milliseconds[is.na(dt$q1_milliseconds)] = 20000000
-dt$q2_milliseconds <- as.integer(dt$q2_milliseconds)
-#dt$q2_milliseconds[is.na(dt$q2_milliseconds)] = 20000000
-dt$q3_milliseconds <- as.integer(dt$q3_milliseconds)
-#dt$q3_milliseconds[is.na(dt$q3_milliseconds)] = 20000000
-
-#convert fastest lap speed
-dt$fastestLapSpeed <- as.numeric(dt$fastestLapSpeed)
-dt$fastestLapSpeed[is.na(dt$fastestLapSpeed)] = 0 #for NAs set to 0
-
 #BEGINNING OF PRELIMINARY ANALYSIS 
 #NOTE: add comparative histograms and boxplots between groups (both distributions on one)
 
 #summary stats of dataset
-summary(dt)
-stat.desc(dt)
 stargazer(dt,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd")) #stargazer best for visual
 
 #start of correlation chart
-dt_numeric <- na.omit(dt)
-dt_numeric <- subset(dt_numeric, select = -c(fastestLap,fastestLapTime,status,constructorResults_status))
-dt_laptimes <- dt_numeric[,c("finishing_position", "q1_milliseconds", "q2_milliseconds","q3_milliseconds","lap_times_milliseconds")]
-dt_laptimes$qmean <- (dt_laptimes$q1_milliseconds+dt_laptimes$q1_milliseconds+dt_laptimes$q1_milliseconds)/3
-chart.Correlation(dt_laptimes,histogram=TRUE, pch=19)
+dt_numeric <- subset(dt, select = -c(fastestLap,fastestLapTime,status))
+#dt_numeric$qmean <- (dt_numeric$q1_milliseconds+dt_numeric$q2_milliseconds+dt_numeric$q3_milliseconds)/3
+dt_model <- dt_numeric[,c("finishing_position","qmean","lap_times_milliseconds","qualifying_position","pit_stops_milliseconds","fastestLapSpeed","circuitId","year")]
+chart.Correlation(dt_model,histogram=TRUE, pch=19)
 
 #library(writexl) #export to dt to excel
 #write_xlsx(dt, "c:/Users/chloe/Desktop/dt.xlsx")
 #write_xlsx(dt_numeric, "c:/Users/chloe/Desktop/dt_numeric.xlsx")
-  
+
 #COMPARING POINTS VS NO POINTS POSITIONS
 #split data into points (>=10) and no points(<10) positions
 dt_points <- dt[dt$finishing_position<=10]
@@ -169,10 +167,10 @@ stargazer(dt_nopoints,type="text",omit=c("driverId","raceId","constructorId","re
 dt_podium <- dt[dt$finishing_position<=3]
 dt_nopodium <- dt[dt$finishing_position>3]
 
-#summary stats of points
+#summary stats of odium
 stargazer(dt_podium,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
 
-#summary stats of no points
+#summary stats of no podium
 stargazer(dt_nopodium,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
 
 #notable differences
