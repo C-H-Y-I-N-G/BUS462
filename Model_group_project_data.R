@@ -233,10 +233,12 @@ pR2(LOGIT_C)
 #first create new variable for podium
 dt$finishing_position <- as.integer(dt$finishing_position) #convert back to integer
 dt$podium <- ifelse(dt$finishing_position>3,0,1)
+dt$podium <- as.factor(dt$podium)
 
-LOGIT_podA
-LOGIT_podB
-LOGIT_podC
+#create models themselves
+LOGIT_podA <- glm(podium~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId,data=dt,family = "binomial")
+LOGIT_podB <- glm(podium~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds,data=dt,family="binomial")
+LOGIT_podC <- glm(podium~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds+laptimexfinmil,data=dt,family="binomial")
 
 
 
