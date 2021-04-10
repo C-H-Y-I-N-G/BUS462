@@ -240,7 +240,18 @@ LOGIT_podA <- glm(podium~lap_times_milliseconds+qualifying_position+pit_stops_mi
 LOGIT_podB <- glm(podium~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds,data=dt,family="binomial")
 LOGIT_podC <- glm(podium~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds+laptimexfinmil,data=dt,family="binomial")
 
+#summary stats for models
+summary(LOGIT_podA)
+summary(LOGIT_podB)
+summary(LOGIT_podC)
 
+#compare the three
+stargazer(LOGIT_podA,LOGIT_podB,LOGIT_podC, type="text")
+
+#McFadden's pseudo r2 for three
+pR2(LOGIT_podA)
+pR2(LOGIT_podB)
+pR2(LOGIT_podC)
 
 
 
