@@ -186,8 +186,14 @@ stargazer(dt_nopodium,type="text",omit=c("driverId","raceId","constructorId","re
 #create potential interaction effects
 
 #OLS Models
+
+#first model with key variables
 OLS_A <- lm(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId,data=dt)
-OLS_B
+
+#adding finishing milliseconds
+OLS_B <- lm(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds,data=dt)
+
+#
 OLS_C
 
 #LOGIT Models, position as categorical dv
