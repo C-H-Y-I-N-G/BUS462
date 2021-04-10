@@ -182,3 +182,11 @@ stargazer(dt_nopodium,type="text",omit=c("driverId","raceId","constructorId","re
 
 #MODELS
 #control for circuit ID and year
+
+#OLS Models
+
+
+#LOGIT Models, position as categorical dv
+
+
+#LOGIT Models, podium as binary dv
