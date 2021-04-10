@@ -15,9 +15,9 @@ require(data.table)
 require(stargazer)
 require(ggplot2)
 require(PerformanceAnalytics)
-require(sqldf)
 require(dyplr)
 require(pastecs)
+require(pscl)
 
 #load data
 lap_times <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/lap_times.csv")
@@ -209,9 +209,24 @@ summary(OLS_C)
 stargazer(OLS_A,OLS_B,OLS_C, type="text")
 
 #LOGIT Models, position as categorical dv
-LOGIT_A
-LOGIT_B
-LOGIT_C
+dt$finishing_position <- as.factor(dt$finishing_position)
+
+LOGIT_A <- glm(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId,data=dt,family = "binomial")
+LOGIT_B <- glm(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds,data=dt,family="binomial")
+LOGIT_C <- glm(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds+laptimexfinmil,data=dt,family="binomial")
+
+#summary stats for models
+summary(LOGIT_A)
+summary(LOGIT_B)
+summary(LOGIT_C)
+
+#compare the three
+stargazer(LOGIT_A,LOGIT_B,LOGIT_C, type="text")
+
+#McFadden's pseudo r2 for three
+pR2(LOGIT_A)
+pR2(LOGIT_B)
+pR2(LOGIT_C)
 
 #LOGIT Models, podium as binary dv
 LOGIT_podA
