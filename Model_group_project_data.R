@@ -208,6 +208,12 @@ summary(OLS_C)
 #compare the three
 stargazer(OLS_A,OLS_B,OLS_C, type="text")
 
+AIC(OLS_A)
+AIC(OLS_B)
+AIC(OLS_C)
+
+#OLS_B is the best model.Year and qualifying position have strong linear relationship with finishing position
+
 #LOGIT Models, position as categorical dv
 dt$finishing_position <- as.factor(dt$finishing_position)
 
@@ -223,10 +229,16 @@ summary(LOGIT_C)
 #compare the three
 stargazer(LOGIT_A,LOGIT_B,LOGIT_C, type="text")
 
+AIC(LOGIT_A)
+AIC(LOGIT_B)
+AIC(LOGIT_C)
+
 #McFadden's pseudo r2 for three
 pR2(LOGIT_A)
 pR2(LOGIT_B)
 pR2(LOGIT_C)
+
+#LOGIT_B is the best model with the lowest AIC and R2
 
 #LOGIT Models, podium as binary dv
 
@@ -253,6 +265,8 @@ pR2(LOGIT_podA)
 pR2(LOGIT_podB)
 pR2(LOGIT_podC)
 
+AIC(LOGIT_podA)
+AIC(LOGIT_podB)
+AIC(LOGIT_podC)
 
-
-
+#LOGIT_podC is the best model with the lowest AIC and R2
