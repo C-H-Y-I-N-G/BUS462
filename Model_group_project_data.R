@@ -184,6 +184,7 @@ stargazer(dt_nopodium,type="text",omit=c("driverId","raceId","constructorId","re
 #control for circuit ID and year
 
 #create potential interaction effects
+laptimexfinmil <- dt$lap_times_milliseconds*dt$finishing_milliseconds #causes na warning
 
 #OLS Models
 
@@ -193,8 +194,13 @@ OLS_A <- lm(finishing_position~lap_times_milliseconds+qualifying_position+pit_st
 #adding finishing milliseconds
 OLS_B <- lm(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds,data=dt)
 
-#
+#adding interaction between lap times and finishing milliseconds
 OLS_C
+
+#summary stats for models
+summary(OLS_A)
+summary(OLS_B)
+summary(OLS_C)
 
 #LOGIT Models, position as categorical dv
 LOGIT_A
