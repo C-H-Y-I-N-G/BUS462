@@ -229,6 +229,17 @@ pR2(LOGIT_B)
 pR2(LOGIT_C)
 
 #LOGIT Models, podium as binary dv
+
+#first create new variable for podium
+dt$finishing_position <- as.integer(dt$finishing_position) #convert back to integer
+dt$podium <- ifelse(dt$finishing_position>3,0,1)
+
 LOGIT_podA
 LOGIT_podB
 LOGIT_podC
+
+
+
+
+
+
