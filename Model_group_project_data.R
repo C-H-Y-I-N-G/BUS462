@@ -100,8 +100,9 @@ head(dt)
 str(dt)
 
 #convert milliseconds from chr to int 
-dt$finishing_milliseconds <- as.integer(dt$finishing_milliseconds)
+dt$finishing_milliseconds <- as.numeric(dt$finishing_milliseconds) #has to be numeric for later interaction effects
 #dt$finishing_milliseconds[is.na(dt$finishing_milliseconds)] = 20000000 #setting dummy value to punish dnf - for model
+
 
 #convert columns to int
 dt$rank <- as.integer(dt$rank)
@@ -184,6 +185,8 @@ stargazer(dt_nopodium,type="text",omit=c("driverId","raceId","constructorId","re
 #control for circuit ID and year
 
 #create potential interaction effects
+
+dt$lap_times_milliseconds <- as.numeric(dt$lap_times_milliseconds) #to avoid issues with size of interactions
 laptimexfinmil <- dt$lap_times_milliseconds*dt$finishing_milliseconds #causes na warning
 
 #OLS Models
@@ -195,12 +198,15 @@ OLS_A <- lm(finishing_position~lap_times_milliseconds+qualifying_position+pit_st
 OLS_B <- lm(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds,data=dt)
 
 #adding interaction between lap times and finishing milliseconds
-OLS_C
+OLS_C <- lm(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds+laptimexfinmil,data=dt)
 
 #summary stats for models
 summary(OLS_A)
 summary(OLS_B)
 summary(OLS_C)
+
+#compare the three
+stargazer(OLS_A,OLS_B,OLS_C, type="text")
 
 #LOGIT Models, position as categorical dv
 LOGIT_A
