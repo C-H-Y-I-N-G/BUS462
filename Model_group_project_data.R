@@ -208,6 +208,17 @@ summary(OLS_C)
 #compare the three
 stargazer(OLS_A,OLS_B,OLS_C, type="text")
 
+#residuals for each
+
+par(mfrow = c(2, 2))
+plot(OLS_A, main = "OLS_A")
+
+plot(OLS_B, main = "OLS_B")
+
+plot(OLS_C, main = "OLS_C")
+par(mfrow = c(1,1))
+
+#compare AIC
 AIC(OLS_A)
 AIC(OLS_B)
 AIC(OLS_C)
@@ -229,6 +240,17 @@ summary(LOGIT_C)
 #compare the three
 stargazer(LOGIT_A,LOGIT_B,LOGIT_C, type="text")
 
+#residuals for each
+
+par(mfrow = c(2, 2))
+plot(LOGIT_A, main = "LOGIT_A")
+
+plot(LOGIT_B, main = "LOGIT_B")
+
+plot(LOGIT_C, main = "LOGIT_C")
+par(mfrow = c(1,1))
+
+#compare AIC
 AIC(LOGIT_A)
 AIC(LOGIT_B)
 AIC(LOGIT_C)
@@ -238,7 +260,7 @@ pR2(LOGIT_A)
 pR2(LOGIT_B)
 pR2(LOGIT_C)
 
-#LOGIT_B is the best model with the lowest AIC and R2
+#LOGIT_B is the best model with the lowest AIC and highest R2
 
 #LOGIT Models, podium as binary dv
 
@@ -260,13 +282,27 @@ summary(LOGIT_podC)
 #compare the three
 stargazer(LOGIT_podA,LOGIT_podB,LOGIT_podC, type="text")
 
+#residuals for each
+
+#Model C1
+par(mfrow = c(2, 2))
+plot(LOGIT_podA, main = "LOGIT_podA")
+
+#Model C2
+plot(LOGIT_podB, main = "LOGIT_podB")
+
+#Model C4
+plot(LOGIT_podC, main = "LOGIT_podC")
+par(mfrow = c(1,1))
+
 #McFadden's pseudo r2 for three
 pR2(LOGIT_podA)
 pR2(LOGIT_podB)
 pR2(LOGIT_podC)
 
+#compare AIC
 AIC(LOGIT_podA)
 AIC(LOGIT_podB)
 AIC(LOGIT_podC)
 
-#LOGIT_podC is the best model with the lowest AIC and R2
+#LOGIT_podC is the best model with the lowest AIC and highest R2
