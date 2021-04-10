@@ -183,10 +183,19 @@ stargazer(dt_nopodium,type="text",omit=c("driverId","raceId","constructorId","re
 #MODELS
 #control for circuit ID and year
 
-#OLS Models
+#create potential interaction effects
 
+#OLS Models
+OLS_A <- lm(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId,data=dt)
+OLS_B
+OLS_C
 
 #LOGIT Models, position as categorical dv
-
+LOGIT_A
+LOGIT_B
+LOGIT_C
 
 #LOGIT Models, podium as binary dv
+LOGIT_podA
+LOGIT_podB
+LOGIT_podC
