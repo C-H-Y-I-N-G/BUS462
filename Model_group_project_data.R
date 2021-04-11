@@ -227,6 +227,7 @@ AIC(OLS_C)
 
 #LOGIT Models, position as categorical dv
 dt$finishing_position <- as.factor(dt$finishing_position)
+dt$qualifying_position <- as.factor(dt$qualifying_position)
 
 LOGIT_A <- glm(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId,data=dt,family = "binomial")
 LOGIT_B <- glm(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds,data=dt,family="binomial")
