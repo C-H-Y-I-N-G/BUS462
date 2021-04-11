@@ -284,14 +284,11 @@ stargazer(LOGIT_podA,LOGIT_podB,LOGIT_podC, type="text")
 
 #residuals for each
 
-#Model C1
 par(mfrow = c(2, 2))
 plot(LOGIT_podA, main = "LOGIT_podA")
 
-#Model C2
 plot(LOGIT_podB, main = "LOGIT_podB")
 
-#Model C4
 plot(LOGIT_podC, main = "LOGIT_podC")
 par(mfrow = c(1,1))
 
@@ -306,3 +303,44 @@ AIC(LOGIT_podB)
 AIC(LOGIT_podC)
 
 #LOGIT_podC is the best model with the lowest AIC and highest R2
+
+
+#LOGIT Models, points as binary dv
+
+#first create new variable for podium
+dt$finishing_position <- as.integer(dt$finishing_position) #convert back to integer
+dt$points <- ifelse(dt$finishing_position>10,0,1)
+dt$points <- as.factor(dt$points)
+
+#create models themselves
+LOGIT_poiA <- glm(points~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId,data=dt,family = "binomial")
+LOGIT_poiB <- glm(points~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds,data=dt,family="binomial")
+LOGIT_poiC <- glm(points~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds+laptimexfinmil,data=dt,family="binomial")
+
+#summary stats for models
+summary(LOGIT_poiA)
+summary(LOGIT_poiB)
+summary(LOGIT_poiC)
+
+#compare the three
+stargazer(LOGIT_poiA,LOGIT_poiB,LOGIT_poiC, type="text")
+
+#residuals for each
+
+par(mfrow = c(2, 2))
+plot(LOGIT_poiA, main = "LOGIT_podA")
+
+plot(LOGIT_poiB, main = "LOGIT_podB")
+
+plot(LOGIT_poiC, main = "LOGIT_podC")
+par(mfrow = c(1,1))
+
+#McFadden's pseudo r2 for three
+pR2(LOGIT_poiA)
+pR2(LOGIT_poiB)
+pR2(LOGIT_poiC)
+
+#compare AIC
+AIC(LOGIT_poiA)
+AIC(LOGIT_poiB)
+AIC(LOGIT_poiC)
