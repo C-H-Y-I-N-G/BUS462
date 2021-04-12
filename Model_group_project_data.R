@@ -18,6 +18,7 @@ require(PerformanceAnalytics)
 require(dyplr)
 require(pastecs)
 require(pscl)
+require(nnet)
 
 #load data
 lap_times <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/lap_times.csv")
@@ -229,6 +230,7 @@ AIC(OLS_C)
 dt$finishing_position <- as.factor(dt$finishing_position)
 dt$qualifying_position <- as.factor(dt$qualifying_position)
 
+LOGIT_KS <- glm(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds+season_position+wins+qmean+lap_times_position+season_points+finishing_points,data=dt,family="binomial")
 LOGIT_A <- glm(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId,data=dt,family = "binomial")
 LOGIT_B <- glm(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds,data=dt,family="binomial")
 LOGIT_C <- glm(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds+laptimexfinmil,data=dt,family="binomial")
@@ -240,6 +242,7 @@ summary(LOGIT_C)
 
 #compare the three
 stargazer(LOGIT_A,LOGIT_B,LOGIT_C, type="text")
+stargazer(LOGIT_KS,LOGIT_B, type="text")
 
 #residuals for each
 
@@ -252,11 +255,13 @@ plot(LOGIT_C, main = "LOGIT_C")
 par(mfrow = c(1,1))
 
 #compare AIC
+AIC(LOGIT_KS)
 AIC(LOGIT_A)
 AIC(LOGIT_B)
 AIC(LOGIT_C)
 
 #McFadden's pseudo r2 for three
+pR2(LOGIT_KS)
 pR2(LOGIT_A)
 pR2(LOGIT_B)
 pR2(LOGIT_C)
@@ -271,6 +276,7 @@ dt$podium <- ifelse(dt$finishing_position>3,0,1)
 dt$podium <- as.factor(dt$podium)
 
 #create models themselves
+LOGIT_podKS <- glm(podium~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds+season_position+wins+qmean+lap_times_position+season_points+finishing_points,data=dt,family="binomial")
 LOGIT_podA <- glm(podium~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId,data=dt,family = "binomial")
 LOGIT_podB <- glm(podium~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds,data=dt,family="binomial")
 LOGIT_podC <- glm(podium~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds+laptimexfinmil,data=dt,family="binomial")
@@ -282,6 +288,7 @@ summary(LOGIT_podC)
 
 #compare the three
 stargazer(LOGIT_podA,LOGIT_podB,LOGIT_podC, type="text")
+stargazer(LOGIT_podKS,LOGIT_podC, type="text")
 
 #residuals for each
 
@@ -294,11 +301,13 @@ plot(LOGIT_podC, main = "LOGIT_podC")
 par(mfrow = c(1,1))
 
 #McFadden's pseudo r2 for three
+pR2(LOGIT_podKS)
 pR2(LOGIT_podA)
 pR2(LOGIT_podB)
 pR2(LOGIT_podC)
 
 #compare AIC
+AIC(LOGIT_podKS)
 AIC(LOGIT_podA)
 AIC(LOGIT_podB)
 AIC(LOGIT_podC)
@@ -345,3 +354,22 @@ pR2(LOGIT_poiC)
 AIC(LOGIT_poiA)
 AIC(LOGIT_poiB)
 AIC(LOGIT_poiC)
+
+#MLR Models
+MLR_A <- multinom(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId, data = dt)
+MLR_B <- multinom(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds, data = dt)
+MLR_C <- multinom(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds+laptimexfinmil, data = dt)
+
+summary(MLR_A)
+summary(MLR_B)
+summary(MLR_C)
+
+stargazer(MLR_A, type = "text")#report is too long so seperate each model
+stargazer(MLR_B, type = "text")
+stargazer(MLR_C, type = "text")
+
+AIC(MLR_A)
+AIC(MLR_B)
+AIC(MLR_C)
+
+#MLR_A is the best model
