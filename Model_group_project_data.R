@@ -237,7 +237,7 @@ AIC(OLS_C)
 
 #OLS_B is the best model.Year and qualifying position have strong linear relationship with finishing position
 
-#LOGIT Models, position as categorical dv
+#LOGIT Models, position as categorical dv #THIS MODEL IS INCORRECT, SHOULD NOT BE USED FOR INTERPRETATION
 dt$finishing_position <- as.factor(dt$finishing_position)
 dt$qualifying_position <- as.factor(dt$qualifying_position)
 
@@ -291,14 +291,15 @@ LOGIT_podKS <- glm(podium~lap_times_milliseconds+qualifying_position+pit_stops_m
 LOGIT_podA <- glm(podium~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId,data=dt,family = "binomial")
 LOGIT_podB <- glm(podium~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds,data=dt,family="binomial")
 LOGIT_podC <- glm(podium~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds+laptimexfinmil,data=dt,family="binomial")
+LOGIT_podD <- glm(podium~qualifying_position+year+circuitId,data=dt,family="binomial")
 
 #summary stats for models
 summary(LOGIT_podA)
 summary(LOGIT_podB)
 summary(LOGIT_podC)
-
+summary(LOGIT_podD)
 #compare the three
-stargazer(LOGIT_podA,LOGIT_podB,LOGIT_podC, type="text")
+stargazer(LOGIT_podA,LOGIT_podB,LOGIT_podC,LOGIT_podD, type="text")
 stargazer(LOGIT_podKS,LOGIT_podC, type="text")
 
 #residuals for each
@@ -316,14 +317,17 @@ pR2(LOGIT_podKS)
 pR2(LOGIT_podA)
 pR2(LOGIT_podB)
 pR2(LOGIT_podC)
+pR2(LOGIT_podD)
 
 #compare AIC
 AIC(LOGIT_podKS)
 AIC(LOGIT_podA)
 AIC(LOGIT_podB)
 AIC(LOGIT_podC)
+AIC(LOGIT_podD)
 
 #LOGIT_podC is the best model with the lowest AIC and highest R2
+#KS has high stats but many of the correlations cannot logically be included
 
 
 #LOGIT Models, points as binary dv
