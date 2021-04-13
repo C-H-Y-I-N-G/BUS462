@@ -248,7 +248,7 @@ dt$podium <- as.factor(dt$podium)
 LOGIT_podKS <- glm(podium~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds+season_position+wins+qmean+lap_times_position+season_points+finishing_points,data=dt,family="binomial")
 LOGIT_podA <- glm(podium~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId,data=dt,family = "binomial")
 LOGIT_podB <- glm(podium~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds,data=dt,family="binomial")
-LOGIT_podC <- glm(podium~qualifying_position+fastestLapSpeed++pit_stops_seconds+year+circuitId,data=dt,family="binomial")
+LOGIT_podC <- glm(podium~qualifying_position+fastestLapSpeed+pit_stops_seconds+year+circuitId,data=dt,family="binomial")
 
 #summary stats for models
 summary(LOGIT_podA)
