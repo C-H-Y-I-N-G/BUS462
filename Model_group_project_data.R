@@ -114,8 +114,8 @@ dt$fastestLapSpeed <- as.numeric(dt$fastestLapSpeed)
 
 #Create new columns with seconds instead of milliseconds for easier interpretation of key variables
 dt$pit_stops_seconds <- (dt$pit_stops_milliseconds)/1000
-dt$lap_times_milliseconds <- (dt$lap_times_milliseconds)/1000
-dt$finishing_milliseconds <- (dt$finishing_milliseconds)/1000
+dt$lap_times_seconds <- (dt$lap_times_milliseconds)/1000
+dt$finishing_seconds <- (dt$finishing_milliseconds)/1000
 
 #omit nas 
 dt <- na.omit(dt)
@@ -139,12 +139,12 @@ stargazer(dt,type="text",omit=c("driverId","raceId","constructorId","resultId","
 #start of correlation chart
 dt_numeric <- subset(dt, select = -c(fastestLap,fastestLapTime,status))
 #dt_numeric$qmean <- (dt_numeric$q1_milliseconds+dt_numeric$q2_milliseconds+dt_numeric$q3_milliseconds)/3
-dt_model <- dt_numeric[,c("finishing_position","qmean","lap_times_milliseconds","qualifying_position","pit_stops_milliseconds","fastestLapSpeed","circuitId","year")]
+dt_model <- dt_numeric[,c("finishing_position","qmean","lap_times_seconds","qualifying_position","pit_stops_seconds","fastestLapSpeed","circuitId","year")]
 chart.Correlation(dt_model,histogram=TRUE, pch=19)
 
 #ggplot correlations
-dt_model_corr <- round(cor(dt_model),1)
-ggcorrplot(dt_model_corr, hc.order = TRUE, 
+dt_model_corr <- round(cor(dt_model),2)
+ggcorrplot(dt_model_corr, hc.order = FALSE, 
            type = "lower", 
            lab = TRUE, 
            lab_size = 3, 
@@ -152,6 +152,8 @@ ggcorrplot(dt_model_corr, hc.order = TRUE,
            colors = c("tomato2", "white", "springgreen3"), 
            title="Correlogram of model", 
            ggtheme=theme_bw)
+
+
 #library(writexl) #export to dt to excel
 #write_xlsx(dt, "c:/Users/chloe/Desktop/dt.xlsx")
 #write_xlsx(dt_numeric, "c:/Users/chloe/Desktop/dt_numeric.xlsx")
@@ -202,10 +204,10 @@ stargazer(dt_nopodium,type="text",omit=c("driverId","raceId","constructorId","re
 #OLS Models
 
 #first model with key variables
-OLS_A <- lm(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId,data=dt)
+OLS_A <- lm(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId,data=dt)
 
 #adding finishing milliseconds
-OLS_B <- lm(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds,data=dt)
+OLS_B <- lm(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds,data=dt)
 
 #adding interaction between lap times and finishing milliseconds #REMOVED, INTERACTION NOT LOGICAL FOR THESE TWO
 #OLS_C <- lm(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds+laptimexfinmil,data=dt)
@@ -243,10 +245,10 @@ dt$podium <- ifelse(dt$finishing_position>3,0,1)
 dt$podium <- as.factor(dt$podium)
 
 #create models themselves
-LOGIT_podKS <- glm(podium~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds+season_position+wins+qmean+lap_times_position+season_points+finishing_points,data=dt,family="binomial")
-LOGIT_podA <- glm(podium~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId,data=dt,family = "binomial")
-LOGIT_podB <- glm(podium~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds,data=dt,family="binomial")
-LOGIT_podC <- glm(podium~qualifying_position+fastestLapSpeed++pit_stops_milliseconds+year+circuitId,data=dt,family="binomial")
+LOGIT_podKS <- glm(podium~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds+season_position+wins+qmean+lap_times_position+season_points+finishing_points,data=dt,family="binomial")
+LOGIT_podA <- glm(podium~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId,data=dt,family = "binomial")
+LOGIT_podB <- glm(podium~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds,data=dt,family="binomial")
+LOGIT_podC <- glm(podium~qualifying_position+fastestLapSpeed++pit_stops_seconds+year+circuitId,data=dt,family="binomial")
 
 #summary stats for models
 summary(LOGIT_podA)
@@ -294,9 +296,9 @@ dt$points <- ifelse(dt$finishing_position>10,0,1)
 dt$points <- as.factor(dt$points)
 
 #create models themselves
-LOGIT_poiA <- glm(points~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId,data=dt,family = "binomial")
-LOGIT_poiB <- glm(points~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds,data=dt,family="binomial")
-LOGIT_poiC <- glm(points~qualifying_position+fastestLapSpeed++pit_stops_milliseconds+year+circuitId,data=dt,family="binomial")
+LOGIT_poiA <- glm(points~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId,data=dt,family = "binomial")
+LOGIT_poiB <- glm(points~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds,data=dt,family="binomial")
+LOGIT_poiC <- glm(points~qualifying_position+fastestLapSpeed++pit_stops_seconds+year+circuitId,data=dt,family="binomial")
 
 #summary stats for models
 summary(LOGIT_poiA)
@@ -330,9 +332,9 @@ AIC(LOGIT_poiC)
 #notable difference is lap times included, tho with small correlation
 
 #MLR Models
-MLR_A <- multinom(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId, data = dt)
-MLR_B <- multinom(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds, data = dt)
-MLR_C <- multinom(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds+laptimexfinmil, data = dt)
+MLR_A <- multinom(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId, data = dt)
+MLR_B <- multinom(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds, data = dt)
+#MLR_C <- multinom(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds+laptimexfinmil, data = dt)
 
 summary(MLR_A)
 summary(MLR_B)
