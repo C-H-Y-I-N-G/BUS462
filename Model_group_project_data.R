@@ -84,9 +84,9 @@ names(lap_times)[names(lap_times) == "lap"] <- "lap_times_lap"
 names(lap_times)[names(lap_times) == "milliseconds"] <- "lap_times_milliseconds"
 dt <- merge(dt,lap_times, by=c("driverId","raceId"))
 
-# replace all the \N race position to 0
+# 
 dt$finishing_position <- as.integer(dt$finishing_position)
-#dt$finishing_position[is.na(dt$finishing_position)] = 23 #can change to 50
+
 
 dt[duplicated(dt)]#check duplication
 dt[!duplicated(dt)]#remove duplication
@@ -101,9 +101,7 @@ head(dt)
 str(dt)
 
 #convert milliseconds from chr to int 
-dt$finishing_milliseconds <- as.numeric(dt$finishing_milliseconds) #has to be numeric for later interaction effects
-#dt$finishing_milliseconds[is.na(dt$finishing_milliseconds)] = 20000000 #setting dummy value to punish dnf - for model
-
+dt$finishing_milliseconds <- as.numeric(dt$finishing_milliseconds) 
 
 #convert columns to int
 dt$rank <- as.integer(dt$rank)
@@ -113,6 +111,11 @@ dt$q3_milliseconds <- as.integer(dt$q3_milliseconds)
 
 #convert fastest lap speed
 dt$fastestLapSpeed <- as.numeric(dt$fastestLapSpeed)
+
+#Create new columns with seconds instead of milliseconds for easier interpretation of key variables
+dt$pit_stops_seconds <- (dt$pit_stops_milliseconds)/1000
+dt$lap_times_milliseconds <- (dt$lap_times_milliseconds)/1000
+dt$finishing_milliseconds <- (dt$finishing_milliseconds)/1000
 
 #omit nas 
 dt <- na.omit(dt)
@@ -195,8 +198,6 @@ stargazer(dt_nopodium,type="text",omit=c("driverId","raceId","constructorId","re
 #MODELS
 #control for circuit ID and year
 
-
-dt$lap_times_milliseconds <- as.numeric(dt$lap_times_milliseconds) #to avoid issues with size of interactions
 
 #OLS Models
 
