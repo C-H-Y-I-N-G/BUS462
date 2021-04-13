@@ -19,6 +19,7 @@ require(dyplr)
 require(pastecs)
 require(pscl)
 require(nnet)
+require(ggcorrplot)
 
 #load data
 lap_times <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/lap_times.csv")
@@ -114,7 +115,7 @@ dt$q3_milliseconds <- as.integer(dt$q3_milliseconds)
 #convert fastest lap speed
 dt$fastestLapSpeed <- as.numeric(dt$fastestLapSpeed)
 
-#omit nas for prelim analysis, will have dummies for model
+#omit nas 
 dt <- na.omit(dt)
 
 dt$qmean <- (dt$q1_milliseconds+dt$q2_milliseconds+dt$q3_milliseconds)/3
@@ -139,6 +140,16 @@ dt_numeric <- subset(dt, select = -c(fastestLap,fastestLapTime,status))
 dt_model <- dt_numeric[,c("finishing_position","qmean","lap_times_milliseconds","qualifying_position","pit_stops_milliseconds","fastestLapSpeed","circuitId","year")]
 chart.Correlation(dt_model,histogram=TRUE, pch=19)
 
+#ggplot correlations
+dt_model_corr <- round(cor(dt_model),1)
+ggcorrplot(dt_model_corr, hc.order = TRUE, 
+           type = "lower", 
+           lab = TRUE, 
+           lab_size = 3, 
+           method="circle", 
+           colors = c("tomato2", "white", "springgreen3"), 
+           title="Correlogram of model", 
+           ggtheme=theme_bw)
 #library(writexl) #export to dt to excel
 #write_xlsx(dt, "c:/Users/chloe/Desktop/dt.xlsx")
 #write_xlsx(dt_numeric, "c:/Users/chloe/Desktop/dt_numeric.xlsx")
