@@ -84,14 +84,13 @@ names(lap_times)[names(lap_times) == "lap"] <- "lap_times_lap"
 names(lap_times)[names(lap_times) == "milliseconds"] <- "lap_times_milliseconds"
 dt <- merge(dt,lap_times, by=c("driverId","raceId"))
 
-# 
-dt$finishing_position <- as.integer(dt$finishing_position)
-
 
 dt[duplicated(dt)]#check duplication
 dt[!duplicated(dt)]#remove duplication
 
 dt <- subset(dt, year > 2014)#shrink the table to year 2015-2020
+
+#DATA MERGING COMPLETE
 
 #look at data
 head(dt)
@@ -100,7 +99,7 @@ head(dt)
 #check data type of columns
 str(dt)
 
-#convert milliseconds from chr to int 
+#convert milliseconds from chr to num
 dt$finishing_milliseconds <- as.numeric(dt$finishing_milliseconds) 
 
 #convert columns to int
@@ -108,6 +107,7 @@ dt$rank <- as.integer(dt$rank)
 dt$q1_milliseconds <- as.integer(dt$q1_milliseconds)
 dt$q2_milliseconds <- as.integer(dt$q2_milliseconds)
 dt$q3_milliseconds <- as.integer(dt$q3_milliseconds)
+dt$finishing_position <- as.integer(dt$finishing_position) #convert  to integer
 
 #convert fastest lap speed
 dt$fastestLapSpeed <- as.numeric(dt$fastestLapSpeed)
@@ -117,11 +117,6 @@ dt$pit_stops_seconds <- (dt$pit_stops_milliseconds)/1000
 dt$lap_times_seconds <- (dt$lap_times_milliseconds)/1000
 dt$finishing_seconds <- (dt$finishing_milliseconds)/1000
 
-#omit nas 
-dt <- na.omit(dt)
-
-dt$qmean <- (dt$q1_milliseconds+dt$q2_milliseconds+dt$q3_milliseconds)/3
-
 #create function that checks if any NAs are in a column
 check_na <- function(my_col){
   any(is.na(my_col))
@@ -130,28 +125,25 @@ check_na <- function(my_col){
 #apply function to each column in the set
 apply(dt, 2, check_na)
 
+#omit nas 
+dt <- na.omit(dt)
+
+#create qmean to summarize quaifying times
+dt$qmean <- (dt$q1_milliseconds+dt$q2_milliseconds+dt$q3_milliseconds)/3
+
+#Create new variable for podium, will be primary dv
+dt$podium <- ifelse(dt$finishing_position>3,0,1)
+
+
+View(dt)#check completed table
+
+
+
 #BEGINNING OF PRELIMINARY ANALYSIS 
 #NOTE: add comparative histograms and boxplots between groups (both distributions on one)
 
 #summary stats of dataset
 stargazer(dt,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd")) #stargazer best for visual
-
-#start of correlation chart
-dt_numeric <- subset(dt, select = -c(fastestLap,fastestLapTime,status))
-#dt_numeric$qmean <- (dt_numeric$q1_milliseconds+dt_numeric$q2_milliseconds+dt_numeric$q3_milliseconds)/3
-dt_model <- dt_numeric[,c("finishing_position","qmean","lap_times_seconds","qualifying_position","pit_stops_seconds","fastestLapSpeed","circuitId","year")]
-chart.Correlation(dt_model,histogram=TRUE, pch=19)
-
-#ggplot correlations
-dt_model_corr <- round(cor(dt_model),2)
-ggcorrplot(dt_model_corr, hc.order = FALSE, 
-           type = "lower", 
-           lab = TRUE, 
-           lab_size = 3, 
-           method="circle", 
-           colors = c("tomato2", "white", "springgreen3"), 
-           title="Correlogram of model", 
-           ggtheme=theme_bw)
 
 
 #library(writexl) #export to dt to excel
@@ -176,15 +168,12 @@ stargazer(dt_nopoints,type="text",omit=c("driverId","raceId","constructorId","re
 #lap time median and means surprisingly close between the two groups 
 #
 
-#graphing variable differences
-
-
 
 #COMPARING PODIUM VS THE REST
 dt_podium <- dt[dt$finishing_position<=3]
 dt_nopodium <- dt[dt$finishing_position>3]
 
-#summary stats of odium
+#summary stats of podium
 stargazer(dt_podium,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
 
 #summary stats of no podium
@@ -196,12 +185,27 @@ stargazer(dt_nopodium,type="text",omit=c("driverId","raceId","constructorId","re
 #more thorough team
 #lap times again slightly lower for higher performing group 
 
+#correlation chart for variables considered for model based on
+dt_model <- dt[,c("podium","qmean","lap_times_seconds","qualifying_position","pit_stops_seconds","fastestLapSpeed","circuitId","year")]
+chart.Correlation(dt_model,histogram=TRUE, pch=19)
+
+#ggplot correlations
+dt_model_corr <- round(cor(dt_model),2)
+ggcorrplot(dt_model_corr, hc.order = FALSE, 
+           type = "lower", 
+           lab = TRUE, 
+           lab_size = 3, 
+           method="circle", 
+           colors = c("tomato2", "white", "springgreen3"), 
+           title="Correlogram of model", 
+           ggtheme=theme_bw)
+
 
 #MODELS
 #control for circuit ID and year
 
-
 #OLS Models
+#used only to test linear relationships with finishing position, podium is our primary dv for real models
 
 #first model with key variables
 OLS_A <- lm(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId,data=dt)
@@ -239,9 +243,7 @@ AIC(OLS_B)
 
 #LOGIT Models, podium as binary dv
 
-#first create new variable for podium
-dt$finishing_position <- as.integer(dt$finishing_position) #convert back to integer
-dt$podium <- ifelse(dt$finishing_position>3,0,1)
+#convert podium to factor for LOGIT
 dt$podium <- as.factor(dt$podium)
 
 #create models themselves
@@ -275,7 +277,6 @@ pR2(LOGIT_podA)
 pR2(LOGIT_podB)
 pR2(LOGIT_podC)
 
-
 #compare AIC
 AIC(LOGIT_podKS)
 AIC(LOGIT_podA)
@@ -290,7 +291,7 @@ AIC(LOGIT_podC)
 
 #LOGIT Models, points as binary dv
 
-#first create new variable for podium
+#create variable for points to compare
 dt$finishing_position <- as.integer(dt$finishing_position) #convert back to integer
 dt$points <- ifelse(dt$finishing_position>10,0,1)
 dt$points <- as.factor(dt$points)
