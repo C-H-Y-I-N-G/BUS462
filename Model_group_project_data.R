@@ -200,6 +200,15 @@ ggcorrplot(dt_model_corr, hc.order = FALSE,
            title="Correlogram of model", 
            ggtheme=theme_bw)
 
+#visualizing highlights of prelim analysis
+
+#qualifying position for podium and non-podium places, shows little to no overlap
+#-> those in podium almost always qualify very high
+ggplot(aes(y = qualifying_position, x = factor(podium)), data = dt) + geom_boxplot(fill="plum") + 
+  labs(title="Box Plot",
+       subtitle="Qualifying Positions for Podium and Non-Podium Placings",
+       x="Podium Status (0=no, 1=yes)",
+       y="Qualifying Position")
 
 #MODELS
 #control for circuit ID and year
