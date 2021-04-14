@@ -20,6 +20,9 @@ require(pastecs)
 require(pscl)
 require(nnet)
 require(ggcorrplot)
+require(jtools)
+require(ggstance)
+require(broom.mixed)
 
 #load data
 lap_times <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/lap_times.csv")
@@ -185,8 +188,10 @@ stargazer(dt_nopodium,type="text",omit=c("driverId","raceId","constructorId","re
 #more thorough team
 #lap times again slightly lower for higher performing group 
 
-#correlation chart for variables considered for model 
+#subset of data with variables of interest, based on prelim analysis
 dt_model <- dt[,c("podium","qmean","lap_times_seconds","qualifying_position","pit_stops_seconds","fastestLapSpeed","finishing_seconds","circuitId","year")]
+
+#correlation chart for variables considered for model 
 chart.Correlation(dt_model,histogram=TRUE, pch=19)
 
 #ggplot correlations
@@ -242,10 +247,10 @@ ggplot(aes(y = lap_times_seconds, x = factor(podium)), data = dt) + geom_boxplot
 #used only to test linear relationships with finishing position, podium is our primary dv for real models
 
 #first model with key variables
-OLS_A <- lm(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId,data=dt)
+OLS_A <- lm(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId,data=dt_model)
 
 #adding finishing milliseconds
-OLS_B <- lm(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds,data=dt)
+OLS_B <- lm(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds,data=dt_model)
 
 
 
@@ -270,13 +275,17 @@ par(mfrow = c(1,1))
 #compare AIC
 AIC(OLS_A)
 AIC(OLS_B)
-#AIC(OLS_C)
+
 
 #OLS_B is the best model.Year and qualifying position have strong linear relationship with finishing position
 
 
 #LOGIT Models, podium as binary dv
 #THESE ARE THE PRIMARY MODELS FOR INTERPRETATION AND ANALYSIS 
+#note: for variables like finishing seconds and lap time seconds, we have chosen to use 
+#one at a time. There are no logical two-way interactions in our variables, but 
+#several one-way interactions which could double count effects and hinder analysis
+#if included
 
 #convert podium to factor for LOGIT
 dt$podium <- as.factor(dt$podium)
@@ -286,19 +295,19 @@ LOGIT_podKS <- glm(podium~lap_times_seconds+qualifying_position+pit_stops_second
 #KS has strong stats but many variables that do not make logical sense
 
 #to start, create minimal model just qualifying position and controls 
-LOGIT_podA <- glm(podium~qualifying_position+year+circuitId,data=dt,family="binomial")
+LOGIT_podA <- glm(podium~qualifying_position+year+circuitId,data=dt_model,family="binomial")
 
 #add fastest lap speed
-LOGIT_podB <- glm(podium~qualifying_position+fastestLapSpeed+year+circuitId,data=dt,family = "binomial")
+LOGIT_podB <- glm(podium~qualifying_position+fastestLapSpeed+year+circuitId,data=dt_model,family = "binomial")
 
 #add pit stop and lap time seconds
-LOGIT_podC <- glm(podium~qualifying_position+fastestLapSpeed+year+circuitId+pit_stops_seconds+lap_times_seconds,data=dt,family="binomial")
+LOGIT_podC <- glm(podium~qualifying_position+fastestLapSpeed+pit_stops_seconds+lap_times_seconds+year+circuitId,data=dt_model,family="binomial")
 
 #create model with finishing seconds instead of lap times, lap times had no significance
-LOGIT_podD<- glm(podium~qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds,data=dt,family="binomial")
+LOGIT_podD<- glm(podium~qualifying_position+pit_stops_seconds+fastestLapSpeed+finishing_seconds+year+circuitId,data=dt_model,family="binomial")
 
 #create model with neither finishing seconds nor lap time seconds
-LOGIT_podE <- glm(podium~qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId,data=dt,family="binomial")
+LOGIT_podE <- glm(podium~qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId,data=dt_model,family="binomial")
 
 
 #summary stats for models
@@ -321,9 +330,9 @@ plot(LOGIT_podB, main = "LOGIT_podB")
 
 plot(LOGIT_podC, main = "LOGIT_podC")
 
-plot(LOGIT_podD, main = "LOGIT_podC")
+plot(LOGIT_podD, main = "LOGIT_podD")
 
-plot(LOGIT_podE, main = "LOGIT_podC")
+plot(LOGIT_podE, main = "LOGIT_podE")
 par(mfrow = c(1,1))
 
 #McFadden's pseudo r2 for three
@@ -343,7 +352,17 @@ AIC(LOGIT_podE)#pod E is barely lowest
 #LOGIT_podC is the best model with the secondlowest AIC and highest R2
 #all variables included have highly significant relationship
 #KS has high stats but many of the correlations cannot logically be included
+stargazer(LOGIT_podC,type="text")
 
+#convert to odds
+exp(cbind(OR = coef(LOGIT_podC), confint(LOGIT_podC)))
+
+#scale coefficients, this is just for analysis
+#referred to https://cran.r-project.org/web/packages/jtools/vignettes/summ.html#plot_summs_and_plot_coefs
+summ(LOGIT_podC,scale=TRUE)
+
+#plot coefficients
+plot_summs(LOGIT_podC,plot.distributions=TRUE,rescale.distributions = TRUE)
 
 #LOGIT Models, points as binary dv
 #will compare all the same models to see if there are any notable differences in how
@@ -354,43 +373,71 @@ dt$finishing_position <- as.integer(dt$finishing_position) #convert back to inte
 dt$points <- ifelse(dt$finishing_position>10,0,1)
 dt$points <- as.factor(dt$points)
 
-#create models themselves
-LOGIT_poiA <- glm(points~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId,data=dt,family = "binomial")
-LOGIT_poiB <- glm(points~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds,data=dt,family="binomial")
-LOGIT_poiC <- glm(points~qualifying_position+fastestLapSpeed++pit_stops_seconds+year+circuitId,data=dt,family="binomial")
+#to start, create minimal model just qualifying position and controls 
+LOGIT_poiA <- glm(points~qualifying_position+year+circuitId,data=dt_model,family="binomial")
+
+#add fastest lap speed
+LOGIT_poiB <- glm(points~qualifying_position+fastestLapSpeed+year+circuitId,data=dt_model,family = "binomial")
+
+#add pit stop and lap time seconds
+LOGIT_poiC <- glm(points~qualifying_position+fastestLapSpeed+pit_stops_seconds+lap_times_seconds+year+circuitId,data=dt_model,family="binomial")
+
+#create model with finishing seconds instead of lap times, lap times had no significance
+LOGIT_poiD<- glm(points~qualifying_position+pit_stops_seconds+fastestLapSpeed+finishing_seconds+year+circuitId,data=dt_model,family="binomial")
+
+#create model with neither finishing seconds nor lap time seconds
+LOGIT_poiE <- glm(points~qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId,data=dt_model,family="binomial")
 
 #summary stats for models
 summary(LOGIT_poiA)
 summary(LOGIT_poiB)
 summary(LOGIT_poiC)
+summary(LOGIT_poiD)
+summary(LOGIT_poiE)
 
 #compare the three
-stargazer(LOGIT_poiA,LOGIT_poiB,LOGIT_poiC, type="text")
+stargazer(LOGIT_poiA,LOGIT_poiB,LOGIT_poiC,LOGIT_poiD,LOGIT_poiE, type="text")
 
 #residuals for each
 
 par(mfrow = c(2, 2))
-plot(LOGIT_poiA, main = "LOGIT_podA")
+plot(LOGIT_poiA, main = "LOGIT_poiA")
 
-plot(LOGIT_poiB, main = "LOGIT_podB")
+plot(LOGIT_poiB, main = "LOGIT_poiB")
 
-plot(LOGIT_poiC, main = "LOGIT_podC")
+plot(LOGIT_poiC, main = "LOGIT_poiC")
+
+plot(LOGIT_poiD, main = "LOGIT_poiD")
+
+plot(LOGIT_poiE, main = "LOGIT_poiE")
 par(mfrow = c(1,1))
 
 #McFadden's pseudo r2 for three
 pR2(LOGIT_poiA)
 pR2(LOGIT_poiB)
 pR2(LOGIT_poiC)
+pR2(LOGIT_poiD) #highest R2
+pR2(LOGIT_poiE)
 
 #compare AIC
 AIC(LOGIT_poiA)
 AIC(LOGIT_poiB)
 AIC(LOGIT_poiC)
+AIC(LOGIT_poiD) #lowest AIC
+AIC(LOGIT_poiE)
 
-#for points, LOGIT_poiB is the best model 
-#notable difference is lap times included, tho with small correlation
+#for points, LOGIT_poiD is the best model 
+#notable difference is finishing seconds model has highest predictive power
+
+#compare model c for both, D for poi
+stargazer(LOGIT_podC,LOGIT_poiC,LOGIT_poiD,type="text")
+#smaller coefficient for qualifying for points, shows to get top 3 its much more vital
+
+#plot coefficients for both
+plot_summs(LOGIT_podC,LOGIT_poiC,model.names = c("LOGIT_podium", "LOGIT_points"))
 
 #MLR Models
+#NOTE: RAN AS EXPERIMENT, NOT BEING USED FOR INTERPRETATION
 MLR_A <- multinom(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId, data = dt)
 MLR_B <- multinom(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds, data = dt)
 #MLR_C <- multinom(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds+laptimexfinmil, data = dt)
