@@ -440,18 +440,16 @@ plot_summs(LOGIT_podC,LOGIT_poiC,model.names = c("LOGIT_podium", "LOGIT_points")
 #NOTE: RAN AS EXPERIMENT, NOT BEING USED FOR INTERPRETATION
 MLR_A <- multinom(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId, data = dt)
 MLR_B <- multinom(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds, data = dt)
-#MLR_C <- multinom(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds+laptimexfinmil, data = dt)
 
 summary(MLR_A)
 summary(MLR_B)
-summary(MLR_C)
 
 stargazer(MLR_A, type = "text")#report is too long so seperate each model
 stargazer(MLR_B, type = "text")
-stargazer(MLR_C, type = "text")
+
 
 AIC(MLR_A)
 AIC(MLR_B)
-AIC(MLR_C)
+
 
 #MLR_A is the best model
