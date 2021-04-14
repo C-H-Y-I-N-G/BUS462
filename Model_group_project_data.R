@@ -185,8 +185,8 @@ stargazer(dt_nopodium,type="text",omit=c("driverId","raceId","constructorId","re
 #more thorough team
 #lap times again slightly lower for higher performing group 
 
-#correlation chart for variables considered for model based on
-dt_model <- dt[,c("podium","qmean","lap_times_seconds","qualifying_position","pit_stops_seconds","fastestLapSpeed","circuitId","year")]
+#correlation chart for variables considered for model 
+dt_model <- dt[,c("podium","qmean","lap_times_seconds","qualifying_position","pit_stops_seconds","fastestLapSpeed","finishing_seconds","circuitId","year")]
 chart.Correlation(dt_model,histogram=TRUE, pch=19)
 
 #ggplot correlations
@@ -209,6 +209,31 @@ ggplot(aes(y = qualifying_position, x = factor(podium)), data = dt) + geom_boxpl
        subtitle="Qualifying Positions for Podium and Non-Podium Placings",
        x="Podium Status (0=no, 1=yes)",
        y="Qualifying Position")
+
+#pit times for podium and non-podium
+#when outliers removed pit stop times between the two are extremely close
+ggplot(aes(y = pit_stops_seconds, x = factor(podium)), data = dt) + geom_boxplot(varwidth=T, fill="plum") + 
+  labs(title="Box Plot",
+       subtitle="Pit Stop Seconds for Podium and Non-Podium Placings",
+       x="Podium Status (0=no, 1=yes)",
+       y="Pit Stop Seconds") + 
+  scale_y_continuous(limits=c(0,50))
+
+#again very close, though podium skews higher with lower variance
+#could indicate consistent performance important
+ggplot(aes(y = fastestLapSpeed, x = factor(podium)), data = dt) + geom_boxplot(fill="plum") + 
+  labs(title="Box Plot",
+       subtitle="Fastest Lap Speeds for Podium and Non-Podium Placings",
+       x="Podium Status (0=no, 1=yes)",
+       y="Fastest Lap Speed")
+
+#lots of outliers, difficult to narrow down
+ggplot(aes(y = lap_times_seconds, x = factor(podium)), data = dt) + geom_boxplot(varwidth=T, fill="plum") + 
+  labs(title="Box Plot",
+       subtitle="Lap Time Seconds for Podium and Non-Podium Placings",
+       x="Podium Status (0=no, 1=yes)",
+       y="Lap Time Seconds")  
+ 
 
 #MODELS
 #control for circuit ID and year
