@@ -197,7 +197,7 @@ ggcorrplot(dt_model_corr, hc.order = FALSE,
            lab_size = 3, 
            method="circle", 
            colors = c("tomato2", "white", "springgreen3"), 
-           title="Correlogram of model", 
+           title="Correlogram of Variables Considered for Model", 
            ggtheme=theme_bw)
 
 #visualizing highlights of prelim analysis
@@ -247,13 +247,12 @@ OLS_A <- lm(finishing_position~lap_times_seconds+qualifying_position+pit_stops_s
 #adding finishing milliseconds
 OLS_B <- lm(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds,data=dt)
 
-#adding interaction between lap times and finishing milliseconds #REMOVED, INTERACTION NOT LOGICAL FOR THESE TWO
-#OLS_C <- lm(finishing_position~lap_times_milliseconds+qualifying_position+pit_stops_milliseconds+fastestLapSpeed+year+circuitId+finishing_milliseconds+laptimexfinmil,data=dt)
+
 
 #summary stats for models
 summary(OLS_A)
 summary(OLS_B)
-#summary(OLS_C)
+
 
 #compare the three
 stargazer(OLS_A,OLS_B, type="text")
@@ -275,24 +274,42 @@ AIC(OLS_B)
 
 #OLS_B is the best model.Year and qualifying position have strong linear relationship with finishing position
 
+
 #LOGIT Models, podium as binary dv
+#THESE ARE THE PRIMARY MODELS FOR INTERPRETATION AND ANALYSIS 
 
 #convert podium to factor for LOGIT
 dt$podium <- as.factor(dt$podium)
 
 #create models themselves
 LOGIT_podKS <- glm(podium~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds+season_position+wins+qmean+lap_times_position+season_points+finishing_points,data=dt,family="binomial")
-LOGIT_podA <- glm(podium~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId,data=dt,family = "binomial")
-LOGIT_podB <- glm(podium~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds,data=dt,family="binomial")
-LOGIT_podC <- glm(podium~qualifying_position+fastestLapSpeed+pit_stops_seconds+year+circuitId,data=dt,family="binomial")
+#KS has strong stats but many variables that do not make logical sense
+
+#to start, create minimal model just qualifying position and controls 
+LOGIT_podA <- glm(podium~qualifying_position+year+circuitId,data=dt,family="binomial")
+
+#add fastest lap speed
+LOGIT_podB <- glm(podium~qualifying_position+fastestLapSpeed+year+circuitId,data=dt,family = "binomial")
+
+#add pit stop and lap time seconds
+LOGIT_podC <- glm(podium~qualifying_position+fastestLapSpeed+year+circuitId+pit_stops_seconds+lap_times_seconds,data=dt,family="binomial")
+
+#create model with finishing seconds instead of lap times, lap times had no significance
+LOGIT_podD<- glm(podium~qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds,data=dt,family="binomial")
+
+#create model with neither finishing seconds nor lap time seconds
+LOGIT_podE <- glm(podium~qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId,data=dt,family="binomial")
+
 
 #summary stats for models
 summary(LOGIT_podA)
 summary(LOGIT_podB)
 summary(LOGIT_podC)
+summary(LOGIT_podD)
+summary(LOGIT_podE)
 
 #compare the three
-stargazer(LOGIT_podKS,LOGIT_podA,LOGIT_podB,LOGIT_podC, type="text")
+stargazer(LOGIT_podA,LOGIT_podB,LOGIT_podC,LOGIT_podD,LOGIT_podE, type="text")
 
 
 #residuals for each
@@ -303,27 +320,34 @@ plot(LOGIT_podA, main = "LOGIT_podA")
 plot(LOGIT_podB, main = "LOGIT_podB")
 
 plot(LOGIT_podC, main = "LOGIT_podC")
+
+plot(LOGIT_podD, main = "LOGIT_podC")
+
+plot(LOGIT_podE, main = "LOGIT_podC")
 par(mfrow = c(1,1))
 
 #McFadden's pseudo r2 for three
-pR2(LOGIT_podKS)
 pR2(LOGIT_podA)
 pR2(LOGIT_podB)
-pR2(LOGIT_podC)
+pR2(LOGIT_podC) #pod C is the highest
+pR2(LOGIT_podD)
+pR2(LOGIT_podE)
 
 #compare AIC
-AIC(LOGIT_podKS)
 AIC(LOGIT_podA)
 AIC(LOGIT_podB)
-AIC(LOGIT_podC)
+AIC(LOGIT_podC) 
+AIC(LOGIT_podD)
+AIC(LOGIT_podE)#pod E is barely lowest
 
-
-#LOGIT_podC is the best model with the lowest AIC and second highest R2
-#all variables included are highly correlated to podium
+#LOGIT_podC is the best model with the secondlowest AIC and highest R2
+#all variables included have highly significant relationship
 #KS has high stats but many of the correlations cannot logically be included
 
 
 #LOGIT Models, points as binary dv
+#will compare all the same models to see if there are any notable differences in how
+#the variables interact 
 
 #create variable for points to compare
 dt$finishing_position <- as.integer(dt$finishing_position) #convert back to integer
