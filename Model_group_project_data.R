@@ -78,8 +78,14 @@ names(qualifying)[names(qualifying) == "position"] <- "qualifying_position"
 qualifying$q1_milliseconds <- as.integer(qualifying$q1_milliseconds)
 qualifying$q2_milliseconds <- as.integer(qualifying$q2_milliseconds)
 qualifying$q3_milliseconds <- as.integer(qualifying$q3_milliseconds)
+
 #convert na to 0 for qmean calc
-df %>% dplyr::mutate(x = replace_na(x, 0))
+qualifying$q1_milliseconds[is.na(qualifying$q1_milliseconds)] <- 0
+qualifying$q2_milliseconds[is.na(qualifying$q2_milliseconds)] <- 0
+qualifying$q3_milliseconds[is.na(qualifying$q3_milliseconds)] <- 0
+
+#df %>% dplyr::mutate(x = replace_na(x, 0))
+
 #calculate qmean
 qualifying$qmean <- (qualifying$q1_milliseconds+qualifying$q2_milliseconds+qualifying$q3_milliseconds)/3
 #qualifying<- subset(dt, select = -c(q1_milliseconds,q2_milliseconds,q3_milliseconds))
@@ -308,7 +314,7 @@ stargazer(dt_nopoints,type="text",omit=c("driverId","raceId","constructorId","re
 #no points finishers surprisingly had lower mean and median pit stop milliseconds
 #lap time median and means surprisingly close between the two groups 
 #
- 
+
 
 #MODELS
 #control for circuit ID and year
