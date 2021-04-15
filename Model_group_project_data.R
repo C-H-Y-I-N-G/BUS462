@@ -84,12 +84,9 @@ qualifying$q1_milliseconds[is.na(qualifying$q1_milliseconds)] <- 0
 qualifying$q2_milliseconds[is.na(qualifying$q2_milliseconds)] <- 0
 qualifying$q3_milliseconds[is.na(qualifying$q3_milliseconds)] <- 0
 
-#df %>% dplyr::mutate(x = replace_na(x, 0))
 
 #calculate qmean
 qualifying$qmean <- (qualifying$q1_milliseconds+qualifying$q2_milliseconds+qualifying$q3_milliseconds)/3
-#qualifying<- subset(dt, select = -c(q1_milliseconds,q2_milliseconds,q3_milliseconds))
-qualifying <- na.omit(qualifying)
 dt <- merge(dt,qualifying,by=c("driverId","raceId","constructorId"))
 
 # organize pit stop tables for merging
@@ -126,14 +123,9 @@ dt$finishing_milliseconds <- as.numeric(dt$finishing_milliseconds)
 
 #convert columns to int
 dt$rank <- as.integer(dt$rank)
-#dt$q1_milliseconds <- as.integer(dt$q1_milliseconds)
-#dt$q2_milliseconds <- as.integer(dt$q2_milliseconds)
-#dt$q3_milliseconds <- as.integer(dt$q3_milliseconds)
 dt$finishing_position <- as.integer(dt$finishing_position) #convert  to integer
 
-#create qmean to summarize quaifying times
-#dt$qmean <- (dt$q1_milliseconds+dt$q2_milliseconds+dt$q3_milliseconds)/3
-#dt <- subset(dt, select = -c(q1_milliseconds,q2_milliseconds,q3_milliseconds))
+
 
 #convert fastest lap speed
 dt$fastestLapSpeed <- as.numeric(dt$fastestLapSpeed)
@@ -168,11 +160,6 @@ View(dt)#check completed table
 
 #summary stats of dataset
 stargazer(dt,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd")) #stargazer best for visual
-
-
-#library(writexl) #export to dt to excel
-#write_xlsx(dt, "c:/Users/chloe/Desktop/dt.xlsx")
-#write_xlsx(dt_numeric, "c:/Users/chloe/Desktop/dt_numeric.xlsx")
 
 
 #COMPARING PODIUM VS THE REST
@@ -245,7 +232,7 @@ ggplot(aes(y = lap_times_seconds, x = factor(podium)), data = dt) + geom_boxplot
        x="Podium Status (0=no, 1=yes)",
        y="Lap Time Seconds")  
 
-#lap times gain but limiting scale, ignoring outliers
+#lap times again but limiting scale, ignoring outliers
 ggplot(aes(y = lap_times_seconds, x = factor(podium)), data = dt) + geom_boxplot(varwidth=T, fill="plum") + 
   labs(title="Box Plot",
        subtitle="Lap Time Seconds for Podium and Non-Podium Placings (Scaled)",
@@ -255,7 +242,7 @@ ggplot(aes(y = lap_times_seconds, x = factor(podium)), data = dt) + geom_boxplot
 
 
 
-#CREATE SUBSET TO DO alpine-SPECIFIC COMPARISON, IMPORTANT TO CHECK IF ANY MAJOR DIFFERENCES
+#CREATE SUBSET TO DO ALPINE-SPECIFIC COMPARISON, IMPORTANT TO CHECK IF ANY MAJOR DIFFERENCES
 dt_alpine = sqldf("SELECT * FROM dt WHERE constructorID = 4")
 
 #qualifying position for podium and non-podium places, very similar result to dataset overall
@@ -308,7 +295,7 @@ stargazer(dt_points,type="text",omit=c("driverId","raceId","constructorId","resu
 #summary stats of no points
 stargazer(dt_nopoints,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
 
-#notable differences (CK wants us to include sd as well as mean when discussing summary)
+#notable differences ]
 #points finishers had higher median and mean fastest lap speed
 #points finishers had MUCH lower(better) qualifying position, determines grid and is likely important
 #no points finishers surprisingly had lower mean and median pit stop milliseconds
@@ -368,7 +355,7 @@ dt$podium <- as.factor(dt$podium)
 
 #create models themselves
 LOGIT_podKS <- glm(podium~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds+season_position+wins+qmean+lap_times_position+season_points+finishing_points,data=dt,family="binomial")
-#KS has strong stats but many variables that do not make logical sense
+#KS has strong stats but many variables that do not make logical sense, will not be used for further analysis
 
 #to start, create minimal model just qualifying position and controls 
 LOGIT_podA <- glm(podium~qualifying_position+year+circuitId,data=dt_model,family="binomial")
@@ -393,7 +380,7 @@ summary(LOGIT_podC)
 summary(LOGIT_podD)
 summary(LOGIT_podE)
 
-#compare the three
+#compare the models
 stargazer(LOGIT_podA,LOGIT_podB,LOGIT_podC,LOGIT_podD,LOGIT_podE, type="text")
 
 
@@ -419,21 +406,21 @@ pR2(LOGIT_podD)
 pR2(LOGIT_podE)
 
 #compare AIC
-AIC(LOGIT_podA)
+AIC(LOGIT_podA)#pod A lowest, barely
 AIC(LOGIT_podB)
 AIC(LOGIT_podC) 
 AIC(LOGIT_podD)
-AIC(LOGIT_podE)#pod E is barely lowest
+AIC(LOGIT_podE)
 
-#LOGIT_podC is the best model with the secondlowest AIC and highest R2
-#all variables included have highly significant relationship
-#KS has high stats but many of the correlations cannot logically be included
+#LOGIT_podC is the best model with the  highest R2
+#Note: many variables not significant, qualifying most critical, keeping variables in for
+#logical relationships, and to demonstrate relative importance for conclusions
 stargazer(LOGIT_podC,type="text")
 
 #convert to odds
 exp(cbind(OR = coef(LOGIT_podC), confint(LOGIT_podC)))
 
-#scale coefficients, this is just for analysis
+#scale coefficients, this is just for context
 #referred to https://cran.r-project.org/web/packages/jtools/vignettes/summ.html#plot_summs_and_plot_coefs
 summ(LOGIT_podC,scale=TRUE)
 
@@ -504,6 +491,7 @@ AIC(LOGIT_poiE)
 
 #for points, LOGIT_poiD is the best model 
 #notable difference is finishing seconds model has highest predictive power
+#will be comparing C for consistency
 
 #compare model c for both
 stargazer(LOGIT_podC,LOGIT_poiC,type="text")
@@ -512,23 +500,6 @@ stargazer(LOGIT_podC,LOGIT_poiC,type="text")
 #plot coefficients for both
 plot_summs(LOGIT_podC,LOGIT_poiC,model.names = c("LOGIT_podium", "LOGIT_points"))
 
-#MLR Models
-#NOTE: RAN AS EXPERIMENT, NOT BEING USED FOR INTERPRETATION
-MLR_A <- multinom(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId, data = dt)
-MLR_B <- multinom(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds, data = dt)
-
-summary(MLR_A)
-summary(MLR_B)
-
-stargazer(MLR_A, type = "text")#report is too long so separate each model
-stargazer(MLR_B, type = "text")
-
-
-AIC(MLR_A)
-AIC(MLR_B)
-
-
-#MLR_A is the best model
 
 #LOGIT podium model for alpine specifically, less effective but checking for differences
 
@@ -555,7 +526,7 @@ summary(LOGIT_podCR)
 summary(LOGIT_podDR)
 summary(LOGIT_podER)
 
-#compare the three
+#compare the models
 stargazer(LOGIT_podAR,LOGIT_podBR,LOGIT_podCR,LOGIT_podDR,LOGIT_podER, type="text")
 
 
@@ -588,6 +559,26 @@ AIC(LOGIT_podDR)
 AIC(LOGIT_podER)#pod E is barely lowest
 
 stargazer(LOGIT_podC,LOGIT_podCR,type="text")
+#shows similar distribution of coefficients, lap times has power
+#overall supports car development recommendation as it would logically impact that as well
+#lack of any drastic differenes for Alpine alone compared to all helps back conclusions
 
+#MLR Models
+#NOTE: RAN AS EXPERIMENT, NOT BEING USED FOR INTERPRETATION
+MLR_A <- multinom(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId, data = dt)
+MLR_B <- multinom(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds, data = dt)
+
+summary(MLR_A)
+summary(MLR_B)
+
+stargazer(MLR_A, type = "text")#report is too long so separate each model
+stargazer(MLR_B, type = "text")
+
+
+AIC(MLR_A)
+AIC(MLR_B)
+
+
+#MLR_A is the best model
 
 
