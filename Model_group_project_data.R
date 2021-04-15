@@ -24,6 +24,7 @@ require(jtools)
 require(ggstance)
 require(broom.mixed)
 require(sqldf)
+require(tidyr)
 
 #load data
 lap_times <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/lap_times.csv")
@@ -72,6 +73,17 @@ dt <- merge(dt,constructor_results, by=c("constructorId","raceId"))
 #NOTE: changed q1-3 times to milliseconds in Excel
 qualifying <- subset(qualifying, select = -c(number,q1,q2,q3,q1_formatted,q2_formatted,q3_formatted))
 names(qualifying)[names(qualifying) == "position"] <- "qualifying_position"
+#code to omit nas without losing all qualifying positions that did not make it to round 3
+#first convert to int
+qualifying$q1_milliseconds <- as.integer(qualifying$q1_milliseconds)
+qualifying$q2_milliseconds <- as.integer(qualifying$q2_milliseconds)
+qualifying$q3_milliseconds <- as.integer(qualifying$q3_milliseconds)
+#convert na to 0 for qmean calc
+df %>% dplyr::mutate(x = replace_na(x, 0))
+#calculate qmean
+qualifying$qmean <- (qualifying$q1_milliseconds+qualifying$q2_milliseconds+qualifying$q3_milliseconds)/3
+#qualifying<- subset(dt, select = -c(q1_milliseconds,q2_milliseconds,q3_milliseconds))
+qualifying <- na.omit(qualifying)
 dt <- merge(dt,qualifying,by=c("driverId","raceId","constructorId"))
 
 # organize pit stop tables for merging
@@ -108,10 +120,14 @@ dt$finishing_milliseconds <- as.numeric(dt$finishing_milliseconds)
 
 #convert columns to int
 dt$rank <- as.integer(dt$rank)
-dt$q1_milliseconds <- as.integer(dt$q1_milliseconds)
-dt$q2_milliseconds <- as.integer(dt$q2_milliseconds)
-dt$q3_milliseconds <- as.integer(dt$q3_milliseconds)
+#dt$q1_milliseconds <- as.integer(dt$q1_milliseconds)
+#dt$q2_milliseconds <- as.integer(dt$q2_milliseconds)
+#dt$q3_milliseconds <- as.integer(dt$q3_milliseconds)
 dt$finishing_position <- as.integer(dt$finishing_position) #convert  to integer
+
+#create qmean to summarize quaifying times
+#dt$qmean <- (dt$q1_milliseconds+dt$q2_milliseconds+dt$q3_milliseconds)/3
+#dt <- subset(dt, select = -c(q1_milliseconds,q2_milliseconds,q3_milliseconds))
 
 #convert fastest lap speed
 dt$fastestLapSpeed <- as.numeric(dt$fastestLapSpeed)
@@ -132,8 +148,6 @@ apply(dt, 2, check_na)
 #omit nas 
 dt <- na.omit(dt)
 
-#create qmean to summarize quaifying times
-dt$qmean <- (dt$q1_milliseconds+dt$q2_milliseconds+dt$q3_milliseconds)/3
 
 #Create new variable for podium, will be primary dv
 dt$podium <- ifelse(dt$finishing_position>3,0,1)
