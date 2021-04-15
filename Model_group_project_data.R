@@ -23,6 +23,7 @@ require(ggcorrplot)
 require(jtools)
 require(ggstance)
 require(broom.mixed)
+require(sqldf)
 
 #load data
 lap_times <- fread("https://raw.githubusercontent.com/C-H-Y-I-N-G/BUS462/main/data/lap_times.csv")
@@ -153,24 +154,6 @@ stargazer(dt,type="text",omit=c("driverId","raceId","constructorId","resultId","
 #write_xlsx(dt, "c:/Users/chloe/Desktop/dt.xlsx")
 #write_xlsx(dt_numeric, "c:/Users/chloe/Desktop/dt_numeric.xlsx")
 
-#COMPARING POINTS VS NO POINTS POSITIONS
-#split data into points (>=10) and no points(<10) positions
-dt_points <- dt[dt$finishing_position<=10]
-dt_nopoints <- dt[dt$finishing_position>10]
-
-#summary stats of points
-stargazer(dt_points,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
-
-#summary stats of no points
-stargazer(dt_nopoints,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
-
-#notable differences (CK wants us to include sd as well as mean when discussing summary)
-#points finishers had higher median and mean fastest lap speed
-#points finishers had MUCH lower(better) qualifying position, determines grid and is likely important
-#no points finishers surprisingly had lower mean and median pit stop milliseconds
-#lap time median and means surprisingly close between the two groups 
-#
-
 
 #COMPARING PODIUM VS THE REST
 dt_podium <- dt[dt$finishing_position<=3]
@@ -190,6 +173,9 @@ stargazer(dt_nopodium,type="text",omit=c("driverId","raceId","constructorId","re
 
 #subset of data with variables of interest, based on prelim analysis
 dt_model <- dt[,c("podium","qmean","lap_times_seconds","qualifying_position","pit_stops_seconds","fastestLapSpeed","finishing_seconds","circuitId","year")]
+
+#summary stats of key variables
+stargazer(dt_model,type="text")
 
 #correlation chart for variables considered for model 
 chart.Correlation(dt_model,histogram=TRUE, pch=19)
@@ -224,7 +210,7 @@ ggplot(aes(y = pit_stops_seconds, x = factor(podium)), data = dt) + geom_boxplot
        y="Pit Stop Seconds") + 
   scale_y_continuous(limits=c(0,50))
 
-#again very close, though podium skews higher with lower variance
+#Fastest lap speed, again very close, though podium skews higher with lower variance
 #could indicate consistent performance important
 ggplot(aes(y = fastestLapSpeed, x = factor(podium)), data = dt) + geom_boxplot(fill="plum") + 
   labs(title="Box Plot",
@@ -232,12 +218,82 @@ ggplot(aes(y = fastestLapSpeed, x = factor(podium)), data = dt) + geom_boxplot(f
        x="Podium Status (0=no, 1=yes)",
        y="Fastest Lap Speed")
 
-#lots of outliers, difficult to narrow down
+#lap  times, lots of outliers, difficult to narrow down
 ggplot(aes(y = lap_times_seconds, x = factor(podium)), data = dt) + geom_boxplot(varwidth=T, fill="plum") + 
   labs(title="Box Plot",
        subtitle="Lap Time Seconds for Podium and Non-Podium Placings",
        x="Podium Status (0=no, 1=yes)",
        y="Lap Time Seconds")  
+
+#lap times gain but limiting scale, ignoring outliers
+ggplot(aes(y = lap_times_seconds, x = factor(podium)), data = dt) + geom_boxplot(varwidth=T, fill="plum") + 
+  labs(title="Box Plot",
+       subtitle="Lap Time Seconds for Podium and Non-Podium Placings (Scaled)",
+       x="Podium Status (0=no, 1=yes)",
+       y="Lap Time Seconds") + 
+  scale_y_continuous(limits=c(0,200)) 
+
+
+
+#CREATE SUBSET TO DO alpine-SPECIFIC COMPARISON, IMPORTANT TO CHECK IF ANY MAJOR DIFFERENCES
+dt_alpine = sqldf("SELECT * FROM dt WHERE constructorID = 4")
+
+#qualifying position for podium and non-podium places, very similar result to dataset overall
+ggplot(aes(y = qualifying_position, x = factor(podium)), data = dt_alpine) + geom_boxplot(fill="plum") + 
+  labs(title="Box Plot ",
+       subtitle="Qualifying Positions for Podium and Non-Podium Placings (Alpine)",
+       x="Podium Status (0=no, 1=yes)",
+       y="Qualifying Position")
+
+#pit times for podium and non-podium
+ggplot(aes(y = pit_stops_seconds, x = factor(podium)), data = dt_alpine) + geom_boxplot(varwidth=T, fill="plum") + 
+  labs(title="Box Plot",
+       subtitle="Pit Stop Seconds for Podium and Non-Podium Placings",
+       x="Podium Status (0=no, 1=yes)",
+       y="Pit Stop Seconds") + 
+  scale_y_continuous(limits=c(0,50))
+
+#again very close, though podium skews higher with lower variance
+#could indicate consistent performance important
+ggplot(aes(y = fastestLapSpeed, x = factor(podium)), data = dt_alpine) + geom_boxplot(fill="plum") + 
+  labs(title="Box Plot",
+       subtitle="Fastest Lap Speeds for Podium and Non-Podium Placings",
+       x="Podium Status (0=no, 1=yes)",
+       y="Fastest Lap Speed")
+
+#lots of outliers, difficult to narrow down
+ggplot(aes(y = lap_times_seconds, x = factor(podium)), data = dt_alpine) + geom_boxplot(varwidth=T, fill="plum") + 
+  labs(title="Box Plot",
+       subtitle="Lap Time Seconds for Podium and Non-Podium Placings",
+       x="Podium Status (0=no, 1=yes)",
+       y="Lap Time Seconds")  
+
+#lap times gain but limiting scale, ignoring outliers
+ggplot(aes(y = lap_times_seconds, x = factor(podium)), data = dt_alpine) + geom_boxplot(varwidth=T, fill="plum") + 
+  labs(title="Box Plot",
+       subtitle="Lap Time Seconds for Podium and Non-Podium Placings (Scaled)",
+       x="Podium Status (0=no, 1=yes)",
+       y="Lap Time Seconds") + 
+  scale_y_continuous(limits=c(0,200)) 
+
+
+#COMPARING POINTS VS NO POINTS POSITIONS
+#split data into points (>=10) and no points(<10) positions
+dt_points <- dt[dt$finishing_position<=10]
+dt_nopoints <- dt[dt$finishing_position>10]
+
+#summary stats of points
+stargazer(dt_points,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
+
+#summary stats of no points
+stargazer(dt_nopoints,type="text",omit=c("driverId","raceId","constructorId","resultId","statusId","year","circuitId","qualifyId"),summary.stat = c("min", "p25", "median","mean", "p75", "max","sd"))
+
+#notable differences (CK wants us to include sd as well as mean when discussing summary)
+#points finishers had higher median and mean fastest lap speed
+#points finishers had MUCH lower(better) qualifying position, determines grid and is likely important
+#no points finishers surprisingly had lower mean and median pit stop milliseconds
+#lap time median and means surprisingly close between the two groups 
+#
  
 
 #MODELS
@@ -247,10 +303,10 @@ ggplot(aes(y = lap_times_seconds, x = factor(podium)), data = dt) + geom_boxplot
 #used only to test linear relationships with finishing position, podium is our primary dv for real models
 
 #first model with key variables
-OLS_A <- lm(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId,data=dt_model)
+OLS_A <- lm(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId,data=dt)
 
 #adding finishing milliseconds
-OLS_B <- lm(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds,data=dt_model)
+OLS_B <- lm(finishing_position~lap_times_seconds+qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId+finishing_seconds,data=dt)
 
 
 
@@ -374,19 +430,19 @@ dt$points <- ifelse(dt$finishing_position>10,0,1)
 dt$points <- as.factor(dt$points)
 
 #to start, create minimal model just qualifying position and controls 
-LOGIT_poiA <- glm(points~qualifying_position+year+circuitId,data=dt_model,family="binomial")
+LOGIT_poiA <- glm(points~qualifying_position+year+circuitId,data=dt,family="binomial")
 
 #add fastest lap speed
-LOGIT_poiB <- glm(points~qualifying_position+fastestLapSpeed+year+circuitId,data=dt_model,family = "binomial")
+LOGIT_poiB <- glm(points~qualifying_position+fastestLapSpeed+year+circuitId,data=dt,family = "binomial")
 
 #add pit stop and lap time seconds
-LOGIT_poiC <- glm(points~qualifying_position+fastestLapSpeed+pit_stops_seconds+lap_times_seconds+year+circuitId,data=dt_model,family="binomial")
+LOGIT_poiC <- glm(points~qualifying_position+fastestLapSpeed+pit_stops_seconds+lap_times_seconds+year+circuitId,data=dt,family="binomial")
 
 #create model with finishing seconds instead of lap times, lap times had no significance
-LOGIT_poiD<- glm(points~qualifying_position+pit_stops_seconds+fastestLapSpeed+finishing_seconds+year+circuitId,data=dt_model,family="binomial")
+LOGIT_poiD<- glm(points~qualifying_position+pit_stops_seconds+fastestLapSpeed+finishing_seconds+year+circuitId,data=dt,family="binomial")
 
 #create model with neither finishing seconds nor lap time seconds
-LOGIT_poiE <- glm(points~qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId,data=dt_model,family="binomial")
+LOGIT_poiE <- glm(points~qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId,data=dt,family="binomial")
 
 #summary stats for models
 summary(LOGIT_poiA)
@@ -429,8 +485,8 @@ AIC(LOGIT_poiE)
 #for points, LOGIT_poiD is the best model 
 #notable difference is finishing seconds model has highest predictive power
 
-#compare model c for both, D for poi
-stargazer(LOGIT_podC,LOGIT_poiC,LOGIT_poiD,type="text")
+#compare model c for both
+stargazer(LOGIT_podC,LOGIT_poiC,type="text")
 #smaller coefficient for qualifying for points, shows to get top 3 its much more vital
 
 #plot coefficients for both
@@ -444,7 +500,7 @@ MLR_B <- multinom(finishing_position~lap_times_seconds+qualifying_position+pit_s
 summary(MLR_A)
 summary(MLR_B)
 
-stargazer(MLR_A, type = "text")#report is too long so seperate each model
+stargazer(MLR_A, type = "text")#report is too long so separate each model
 stargazer(MLR_B, type = "text")
 
 
@@ -453,3 +509,65 @@ AIC(MLR_B)
 
 
 #MLR_A is the best model
+
+#LOGIT podium model for alpine specifically, less effective but checking for differences
+
+#to start, create minimal model just qualifying position and controls 
+LOGIT_podAR <- glm(podium~qualifying_position+year+circuitId,data=dt_alpine,family="binomial")
+
+#add fastest lap speed
+LOGIT_podBR <- glm(podium~qualifying_position+fastestLapSpeed+year+circuitId,data=dt_alpine,family = "binomial")
+
+#add pit stop and lap time seconds
+LOGIT_podCR <- glm(podium~qualifying_position+fastestLapSpeed+pit_stops_seconds+lap_times_seconds+year+circuitId,data=dt_alpine,family="binomial")
+
+#create model with finishing seconds instead of lap times, lap times had no significance
+LOGIT_podDR<- glm(podium~qualifying_position+pit_stops_seconds+fastestLapSpeed+finishing_seconds+year+circuitId,data=dt_alpine,family="binomial")
+
+#create model with neither finishing seconds nor lap time seconds
+LOGIT_podER <- glm(podium~qualifying_position+pit_stops_seconds+fastestLapSpeed+year+circuitId,data=dt_alpine,family="binomial")
+
+
+#summary stats for models
+summary(LOGIT_podAR)
+summary(LOGIT_podBR)
+summary(LOGIT_podCR)
+summary(LOGIT_podDR)
+summary(LOGIT_podER)
+
+#compare the three
+stargazer(LOGIT_podAR,LOGIT_podBR,LOGIT_podCR,LOGIT_podDR,LOGIT_podER, type="text")
+
+
+#residuals for each
+
+par(mfrow = c(2, 2))
+plot(LOGIT_podAR, main = "LOGIT_podAR")
+
+plot(LOGIT_podBR, main = "LOGIT_podBR")
+
+plot(LOGIT_podCR, main = "LOGIT_podCR")
+
+plot(LOGIT_podDR, main = "LOGIT_podDR")
+
+plot(LOGIT_podER, main = "LOGIT_podER")
+par(mfrow = c(1,1))
+
+#McFadden's pseudo r2 for three
+pR2(LOGIT_podAR)
+pR2(LOGIT_podBR)
+pR2(LOGIT_podCR) #pod C is the highest
+pR2(LOGIT_podDR)
+pR2(LOGIT_podER)
+
+#compare AIC
+AIC(LOGIT_podAR)
+AIC(LOGIT_podBR)
+AIC(LOGIT_podCR) 
+AIC(LOGIT_podDR)
+AIC(LOGIT_podER)#pod E is barely lowest
+
+stargazer(LOGIT_podC,LOGIT_podCR,type="text")
+
+
+
